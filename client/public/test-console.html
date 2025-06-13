@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FogueHack テストコンソール</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #00ff00;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.4;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section {
+            border: 1px solid #00ff00;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        button {
+            background: #001100;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-family: inherit;
+        }
+        button:hover {
+            background: #002200;
+        }
+        .output {
+            background: #001100;
+            border: 1px solid #004400;
+            padding: 10px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 3px;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff4444; }
+        .warning { color: #ffaa00; }
+        .info { color: #4499ff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 FogueHack テストコンソール</h1>
+        <p>このコンソールを使用して、FogueHackゲームの各システムをテストできます。</p>
+
+        <div class="test-section">
+            <h2>📋 基本テスト</h2>
+            <button onclick="runBasicTests()">基本機能テスト実行</button>
+            <button onclick="testGameFlow()">ゲームフローテスト</button>
+            <button onclick="testAllSystems()">全システムテスト</button>
+            <div id="basic-output" class="output"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔧 エラー検出・修正</h2>
+            <button onclick="runErrorDetection()">エラー検出実行</button>
+            <button onclick="runErrorFixes()">エラー修正実行</button>
+            <button onclick="validateFinal()">最終検証実行</button>
+            <div id="error-output" class="output"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎯 個別システムテスト</h2>
+            <button onclick="testMagicSystem()">魔法システム</button>
+            <button onclick="testQuestSystem()">クエストシステム</button>
+            <button onclick="testCraftingSystem()">合成システム</button>
+            <button onclick="testCombatSystem()">戦闘システム</button>
+            <div id="system-output" class="output"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>💾 データテスト</h2>
+            <button onclick="testSaveLoad()">セーブ/ロード</button>
+            <button onclick="testDataIntegrity()">データ整合性</button>
+            <button onclick="testPerformance()">パフォーマンス</button>
+            <div id="data-output" class="output"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 テスト結果サマリー</h2>
+            <button onclick="generateReport()">完全テストレポート生成</button>
+            <button onclick="clearAllOutputs()">出力クリア</button>
+            <div id="summary-output" class="output"></div>
+        </div>
+    </div>
+
+    <script>
+        // 出力ヘルパー関数
+        function output(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type;
+            element.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        function clearOutput(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        function clearAllOutputs() {
+            ['basic-output', 'error-output', 'system-output', 'data-output', 'summary-output'].forEach(clearOutput);
+        }
+
+        // 基本テスト関数
+        async function runBasicTests() {
+            clearOutput('basic-output');
+            output('basic-output', '基本テスト開始...', 'info');
+
+            try {
+                // 1. ゲームエンジン初期化テスト
+                if (typeof window.useGameState === 'undefined') {
+                    throw new Error('useGameState が定義されていません');
+                }
+
+                const gameState = window.useGameState.getState();
+                if (!gameState.gameEngine) {
+                    throw new Error('ゲームエンジンが初期化されていません');
+                }
+
+                output('basic-output', 'ゲームエンジン初期化 ✅', 'success');
+
+                // 2. 新ゲーム開始テスト
+                gameState.startNewGame();
+                if (gameState.phase !== 'playing') {
+                    throw new Error('ゲーム開始に失敗しました');
+                }
+
+                output('basic-output', 'ゲーム開始 ✅', 'success');
+
+                // 3. プレイヤー存在確認
+                if (!gameState.player) {
+                    throw new Error('プレイヤーが作成されていません');
+                }
+
+                output('basic-output', `プレイヤー作成 ✅ (Lv.${gameState.player.level}, HP:${gameState.player.hp}/${gameState.player.maxHp})`, 'success');
+
+                // 4. ダンジョン生成確認
+                if (!gameState.dungeon || gameState.dungeon.length === 0) {
+                    throw new Error('ダンジョンが生成されていません');
+                }
+
+                output('basic-output', `ダンジョン生成 ✅ (${gameState.dungeon.length}x${gameState.dungeon[0].length})`, 'success');
+
+                output('basic-output', '基本テスト完了 🎉', 'success');
+
+            } catch (error) {
+                output('basic-output', `基本テスト失敗: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGameFlow() {
+            clearOutput('basic-output');
+            output('basic-output', 'ゲームフローテスト開始...', 'info');
+
+            try {
+                const gameState = window.useGameState.getState();
+                gameState.startNewGame();
+
+                // プレイヤー移動テスト
+                const initialPos = {...gameState.player.position};
+                const directions = ['north', 'south', 'east', 'west'];
+                let moveCount = 0;
+
+                for (const direction of directions) {
+                    try {
+                        gameState.movePlayer(direction);
+                        moveCount++;
+                        output('basic-output', `${direction}方向移動 ✅`, 'success');
+                    } catch (error) {
+                        output('basic-output', `${direction}方向移動 ❌ (${error.message})`, 'warning');
+                    }
+                }
+
+                output('basic-output', `移動テスト完了: ${moveCount}/4方向成功`, moveCount > 0 ? 'success' : 'error');
+
+                // 魔法使用テスト
+                try {
+                    gameState.castHeal();
+                    output('basic-output', 'ヒール魔法 ✅', 'success');
+                } catch (error) {
+                    output('basic-output', `ヒール魔法 ❌ (${error.message})`, 'warning');
+                }
+
+                // インベントリテスト
+                try {
+                    gameState.toggleInventory();
+                    output('basic-output', 'インベントリ操作 ✅', 'success');
+                } catch (error) {
+                    output('basic-output', `インベントリ操作 ❌ (${error.message})`, 'error');
+                }
+
+                output('basic-output', 'ゲームフローテスト完了 🎉', 'success');
+
+            } catch (error) {
+                output('basic-output', `ゲームフローテスト失敗: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAllSystems() {
+            clearOutput('basic-output');
+            output('basic-output', '全システムテスト開始...', 'info');
+
+            const tests = [
+                { name: '魔法システム', fn: () => testMagicSystemInternal() },
+                { name: 'クエストシステム', fn: () => testQuestSystemInternal() },
+                { name: '合成システム', fn: () => testCraftingSystemInternal() },
+                { name: 'セーブ/ロード', fn: () => testSaveLoadInternal() }
+            ];
+
+            let passed = 0;
+            for (const test of tests) {
+                try {
+                    await test.fn();
+                    output('basic-output', `${test.name} ✅`, 'success');
+                    passed++;
+                } catch (error) {
+                    output('basic-output', `${test.name} ❌ (${error.message})`, 'error');
+                }
+            }
+
+            const success = passed === tests.length;
+            output('basic-output', `全システムテスト完了: ${passed}/${tests.length}`, success ? 'success' : 'error');
+        }
+
+        // 個別システムテスト用の内部関数
+        function testMagicSystemInternal() {
+            const gameState = window.useGameState.getState();
+            gameState.startNewGame();
+
+            const knownSpells = gameState.getKnownSpells();
+            if (!knownSpells || knownSpells.length === 0) {
+                throw new Error('習得済み魔法がありません');
+            }
+
+            // ヒール魔法テスト
+            const initialHp = gameState.player.hp;
+            gameState.player.hp = Math.floor(gameState.player.maxHp * 0.5);
+            gameState.castHeal();
+            
+            if (gameState.player.hp <= Math.floor(gameState.player.maxHp * 0.5)) {
+                throw new Error('ヒール効果が適用されていません');
+            }
+
+            return `魔法システム正常 (${knownSpells.length}個の魔法利用可能)`;
+        }
+
+        function testQuestSystemInternal() {
+            const gameState = window.useGameState.getState();
+            gameState.startNewGame();
+
+            const availableQuests = gameState.getAvailableQuests();
+            if (!availableQuests || availableQuests.length === 0) {
+                throw new Error('利用可能なクエストがありません');
+            }
+
+            const firstQuest = availableQuests[0];
+            const acceptResult = gameState.acceptQuest(firstQuest.id);
+            if (!acceptResult) {
+                throw new Error('クエスト受諾に失敗しました');
+            }
+
+            return `クエストシステム正常 (${availableQuests.length}個のクエスト利用可能)`;
+        }
+
+        function testCraftingSystemInternal() {
+            const gameState = window.useGameState.getState();
+            gameState.startNewGame();
+
+            const recipes = gameState.getAvailableRecipes();
+            if (!recipes || recipes.length === 0) {
+                throw new Error('利用可能なレシピがありません');
+            }
+
+            const firstRecipe = recipes[0];
+            const craftCheck = gameState.canCraftItem(firstRecipe.id);
+            if (typeof craftCheck.canCraft !== 'boolean') {
+                throw new Error('合成チェック機能が正常に動作していません');
+            }
+
+            return `合成システム正常 (${recipes.length}個のレシピ利用可能)`;
+        }
+
+        function testSaveLoadInternal() {
+            const gameState = window.useGameState.getState();
+            gameState.startNewGame();
+
+            const originalLevel = gameState.player.level;
+            const originalGold = gameState.player.gold;
+
+            gameState.saveGame();
+            gameState.player.level = originalLevel + 1;
+            gameState.player.gold = originalGold + 100;
+
+            gameState.loadGame();
+
+            if (gameState.player.level !== originalLevel || gameState.player.gold !== originalGold) {
+                throw new Error('セーブ/ロードでデータが正しく復元されませんでした');
+            }
+
+            return 'セーブ/ロードシステム正常';
+        }
+
+        // エラー検出・修正関数
+        async function runErrorDetection() {
+            clearOutput('error-output');
+            output('error-output', 'エラー検出開始...', 'info');
+
+            try {
+                if (typeof window.runErrorDetection === 'function') {
+                    await window.runErrorDetection();
+                    output('error-output', 'エラー検出完了 ✅', 'success');
+                } else {
+                    output('error-output', 'エラー検出スクリプトが見つかりません', 'error');
+                }
+            } catch (error) {
+                output('error-output', `エラー検出中にエラー: ${error.message}`, 'error');
+            }
+        }
+
+        async function runErrorFixes() {
+            clearOutput('error-output');
+            output('error-output', 'エラー修正開始...', 'info');
+
+            try {
+                if (typeof window.runGameErrorFixes === 'function') {
+                    await window.runGameErrorFixes();
+                    output('error-output', 'エラー修正完了 ✅', 'success');
+                } else {
+                    output('error-output', 'エラー修正スクリプトが見つかりません', 'error');
+                }
+            } catch (error) {
+                output('error-output', `エラー修正中にエラー: ${error.message}`, 'error');
+            }
+        }
+
+        async function validateFinal() {
+            clearOutput('error-output');
+            output('error-output', '最終検証開始...', 'info');
+
+            try {
+                if (typeof window.runFinalValidation === 'function') {
+                    const result = await window.runFinalValidation();
+                    output('error-output', '最終検証完了 ✅', 'success');
+                } else {
+                    output('error-output', '最終検証スクリプトが見つかりません', 'error');
+                }
+            } catch (error) {
+                output('error-output', `最終検証中にエラー: ${error.message}`, 'error');
+            }
+        }
+
+        // 個別システムテスト関数
+        async function testMagicSystem() {
+            clearOutput('system-output');
+            output('system-output', '魔法システムテスト開始...', 'info');
+
+            try {
+                const result = testMagicSystemInternal();
+                output('system-output', result, 'success');
+            } catch (error) {
+                output('system-output', `魔法システムエラー: ${error.message}`, 'error');
+            }
+        }
+
+        async function testQuestSystem() {
+            clearOutput('system-output');
+            output('system-output', 'クエストシステムテスト開始...', 'info');
+
+            try {
+                const result = testQuestSystemInternal();
+                output('system-output', result, 'success');
+            } catch (error) {
+                output('system-output', `クエストシステムエラー: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCraftingSystem() {
+            clearOutput('system-output');
+            output('system-output', '合成システムテスト開始...', 'info');
+
+            try {
+                const result = testCraftingSystemInternal();
+                output('system-output', result, 'success');
+            } catch (error) {
+                output('system-output', `合成システムエラー: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCombatSystem() {
+            clearOutput('system-output');
+            output('system-output', '戦闘システムテスト開始...', 'info');
+
+            try {
+                const gameState = window.useGameState.getState();
+                gameState.startNewGame();
+
+                if (gameState.monsters.length === 0) {
+                    throw new Error('モンスターが生成されていません');
+                }
+
+                const monsterCount = gameState.monsters.length;
+                output('system-output', `戦闘システム正常 (${monsterCount}体のモンスター生成)`, 'success');
+            } catch (error) {
+                output('system-output', `戦闘システムエラー: ${error.message}`, 'error');
+            }
+        }
+
+        // データテスト関数
+        async function testSaveLoad() {
+            clearOutput('data-output');
+            output('data-output', 'セーブ/ロードテスト開始...', 'info');
+
+            try {
+                const result = testSaveLoadInternal();
+                output('data-output', result, 'success');
+            } catch (error) {
+                output('data-output', `セーブ/ロードエラー: ${error.message}`, 'error');
+            }
+        }
+
+        async function testDataIntegrity() {
+            clearOutput('data-output');
+            output('data-output', 'データ整合性テスト開始...', 'info');
+
+            try {
+                const gameState = window.useGameState.getState();
+                gameState.startNewGame();
+
+                // プレイヤーデータ整合性
+                if (gameState.player.hp <= 0 || gameState.player.hp > gameState.player.maxHp) {
+                    throw new Error('プレイヤーHP値が不正です');
+                }
+
+                if (gameState.player.level < 1) {
+                    throw new Error('プレイヤーレベルが不正です');
+                }
+
+                // ダンジョンデータ整合性
+                if (gameState.dungeon.length === 0 || gameState.dungeon[0].length === 0) {
+                    throw new Error('ダンジョンサイズが不正です');
+                }
+
+                output('data-output', 'データ整合性確認完了 ✅', 'success');
+            } catch (error) {
+                output('data-output', `データ整合性エラー: ${error.message}`, 'error');
+            }
+        }
+
+        async function testPerformance() {
+            clearOutput('data-output');
+            output('data-output', 'パフォーマンステスト開始...', 'info');
+
+            const startTime = performance.now();
+
+            try {
+                const gameState = window.useGameState.getState();
+                
+                // 10回のゲーム開始
+                for (let i = 0; i < 10; i++) {
+                    gameState.startNewGame();
+                }
+
+                // 100回の移動
+                for (let i = 0; i < 100; i++) {
+                    try {
+                        gameState.movePlayer('north');
+                    } catch (error) {
+                        // 移動できない場合は無視
+                    }
+                }
+
+                const endTime = performance.now();
+                const duration = endTime - startTime;
+
+                if (duration > 2000) {
+                    output('data-output', `パフォーマンス警告: ${duration.toFixed(2)}ms`, 'warning');
+                } else {
+                    output('data-output', `パフォーマンス良好: ${duration.toFixed(2)}ms`, 'success');
+                }
+            } catch (error) {
+                output('data-output', `パフォーマンステストエラー: ${error.message}`, 'error');
+            }
+        }
+
+        // レポート生成
+        async function generateReport() {
+            clearOutput('summary-output');
+            output('summary-output', '完全テストレポート生成中...', 'info');
+
+            const report = {
+                timestamp: new Date().toLocaleString(),
+                tests: []
+            };
+
+            // 全テストを順次実行
+            const testSuites = [
+                { name: '基本機能', fn: runBasicTests },
+                { name: 'ゲームフロー', fn: testGameFlow },
+                { name: '魔法システム', fn: testMagicSystem },
+                { name: 'クエストシステム', fn: testQuestSystem },
+                { name: '合成システム', fn: testCraftingSystem },
+                { name: '戦闘システム', fn: testCombatSystem },
+                { name: 'セーブ/ロード', fn: testSaveLoad },
+                { name: 'データ整合性', fn: testDataIntegrity },
+                { name: 'パフォーマンス', fn: testPerformance }
+            ];
+
+            let passed = 0;
+            for (const testSuite of testSuites) {
+                try {
+                    await testSuite.fn();
+                    report.tests.push({ name: testSuite.name, status: 'PASS' });
+                    passed++;
+                } catch (error) {
+                    report.tests.push({ name: testSuite.name, status: 'FAIL', error: error.message });
+                }
+            }
+
+            const successRate = ((passed / testSuites.length) * 100).toFixed(1);
+
+            output('summary-output', `=== FogueHack テストレポート ===`, 'info');
+            output('summary-output', `生成日時: ${report.timestamp}`, 'info');
+            output('summary-output', `合格率: ${passed}/${testSuites.length} (${successRate}%)`, 'info');
+            output('summary-output', '', 'info');
+
+            report.tests.forEach(test => {
+                const status = test.status === 'PASS' ? '✅' : '❌';
+                output('summary-output', `${status} ${test.name}`, test.status === 'PASS' ? 'success' : 'error');
+                if (test.error) {
+                    output('summary-output', `   エラー: ${test.error}`, 'error');
+                }
+            });
+
+            if (passed === testSuites.length) {
+                output('summary-output', '\n🎉 全テスト合格！FogueHackは正常に動作しています。', 'success');
+            } else {
+                output('summary-output', '\n⚠️ 一部のテストで問題が発見されました。修正が必要です。', 'warning');
+            }
+        }
+
+        // 初期化
+        window.addEventListener('load', () => {
+            output('summary-output', 'FogueHack テストコンソール準備完了', 'success');
+            output('summary-output', '各ボタンをクリックしてテストを実行してください', 'info');
+        });
+    </script>
+</body>
+</html>

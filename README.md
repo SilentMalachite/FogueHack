@@ -4,7 +4,7 @@
 
 FogueHackは、クラシックなNetHackにインスパイアされたブラウザベースのローグライクRPGです。日本語完全対応で、豊富なゲームシステムと直感的な操作性を提供します。
 
-![FogueHack Screenshot](https://via.placeholder.com/800x400/000000/00ff00?text=FogueHack+ASCII+RPG)
+![FogueHack](https://github.com/user-attachments/assets/d44f1686-d3ca-4740-ae1e-b065cebfd8ef)
 
 ## ✨ 特徴
 

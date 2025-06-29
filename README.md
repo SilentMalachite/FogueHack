@@ -48,7 +48,7 @@ FogueHackは、クラシックなNetHackにインスパイアされたブラウ�
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/yourusername/FogueHack.git
+git clone https://github.com/SilentMalachite/FogueHack.git
 cd FogueHack
 
 # 依存関係をインストール

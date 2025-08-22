@@ -5,7 +5,7 @@ import { useAudio } from "./useAudio";
 
 interface GameStore extends GameState {
   gameEngine: GameEngine;
-  
+
   // Actions
   startNewGame: () => void;
   movePlayer: (direction: Direction) => void;
@@ -38,7 +38,7 @@ export const useGameState = create<GameStore>((set, get) => {
     startNewGame: () => {
       const newState = get().gameEngine.startNewGame();
       set(newState);
-      
+
       // Start background music when game starts
       const { playBackgroundMusic } = useAudio.getState();
       setTimeout(() => {
@@ -49,7 +49,7 @@ export const useGameState = create<GameStore>((set, get) => {
     movePlayer: (direction: Direction) => {
       const newState = get().gameEngine.movePlayer(direction);
       set(newState);
-      
+
       // Play move sound
       const { playMove } = useAudio.getState();
       playMove();
@@ -58,7 +58,7 @@ export const useGameState = create<GameStore>((set, get) => {
     castHeal: () => {
       const newState = get().gameEngine.castHeal();
       set(newState);
-      
+
       // Play success sound for healing
       const { playSuccess } = useAudio.getState();
       playSuccess();
@@ -67,7 +67,7 @@ export const useGameState = create<GameStore>((set, get) => {
     castFireball: () => {
       const newState = get().gameEngine.castFireball();
       set(newState);
-      
+
       // Play hit sound for fireball
       const { playHit } = useAudio.getState();
       playHit();
@@ -140,6 +140,6 @@ export const useGameState = create<GameStore>((set, get) => {
       if (loadedState) {
         set(loadedState);
       }
-    }
+    },
   };
 });

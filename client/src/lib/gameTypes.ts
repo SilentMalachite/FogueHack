@@ -40,26 +40,26 @@ export interface Monster {
 export interface Item {
   id: string;
   name: string;
-  type: 'weapon' | 'armor' | 'potion' | 'scroll' | 'misc' | 'material' | 'gem';
+  type: "weapon" | "armor" | "potion" | "scroll" | "misc" | "material" | "gem";
   symbol: string;
   color: string;
   value: number;
   effects?: ItemEffect[];
-  rarity?: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+  rarity?: "common" | "uncommon" | "rare" | "epic" | "legendary";
   craftable?: boolean;
   materials?: string[]; // 合成に必要な素材のID
   description?: string;
 }
 
 export interface ItemEffect {
-  type: 'heal' | 'mana' | 'attack' | 'defense' | 'speed' | 'luck' | 'magic_power';
+  type: "heal" | "mana" | "attack" | "defense" | "speed" | "luck" | "magic_power";
   value: number;
 }
 
 export interface Spell {
   id: string;
   name: string;
-  type: 'offensive' | 'defensive' | 'utility' | 'healing';
+  type: "offensive" | "defensive" | "utility" | "healing";
   manaCost: number;
   damage?: number;
   healAmount?: number;
@@ -72,8 +72,8 @@ export interface Spell {
 }
 
 export interface SpellEffect {
-  type: 'damage' | 'heal' | 'buff' | 'debuff' | 'teleport' | 'summon';
-  target: 'self' | 'enemy' | 'area' | 'all_enemies';
+  type: "damage" | "heal" | "buff" | "debuff" | "teleport" | "summon";
+  target: "self" | "enemy" | "area" | "all_enemies";
   duration?: number; // ターン数
   value: number;
 }
@@ -84,7 +84,7 @@ export interface Equipment {
 }
 
 export interface DungeonTile {
-  type: 'wall' | 'floor' | 'door' | 'stairs' | 'water' | 'lava' | 'pillar' | 'chest' | 'trap';
+  type: "wall" | "floor" | "door" | "stairs" | "water" | "lava" | "pillar" | "chest" | "trap";
   symbol: string;
   passable: boolean;
   color?: string;
@@ -96,14 +96,14 @@ export interface Room {
   y: number;
   width: number;
   height: number;
-  type: 'normal' | 'treasure' | 'boss' | 'library' | 'prison' | 'shrine';
+  type: "normal" | "treasure" | "boss" | "library" | "prison" | "shrine";
   connected: boolean;
   centerX: number;
   centerY: number;
 }
 
 export interface GameState {
-  phase: 'menu' | 'playing' | 'inventory' | 'dead';
+  phase: "menu" | "playing" | "inventory" | "dead";
   dungeon: DungeonTile[][];
   player: Player;
   monsters: Monster[];
@@ -115,4 +115,12 @@ export interface GameState {
   gameOver: boolean;
 }
 
-export type Direction = 'north' | 'south' | 'east' | 'west' | 'northeast' | 'northwest' | 'southeast' | 'southwest';
+export type Direction =
+  | "north"
+  | "south"
+  | "east"
+  | "west"
+  | "northeast"
+  | "northwest"
+  | "southeast"
+  | "southwest";

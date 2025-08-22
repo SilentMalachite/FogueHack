@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { useGameState } from '../lib/stores/useGameState';
+import React, { useState } from "react";
+import { useGameState } from "../lib/stores/useGameState";
 
 const SpellBook: React.FC = () => {
   const { getKnownSpells, castSpell, player, phase } = useGameState();
   const [selectedSpell, setSelectedSpell] = useState<string | null>(null);
 
-  if (phase !== 'playing') return null;
+  if (phase !== "playing") return null;
 
   const knownSpells = getKnownSpells();
 
@@ -17,16 +17,16 @@ const SpellBook: React.FC = () => {
   return (
     <div className="fixed top-4 right-4 bg-black/80 text-white p-4 rounded border border-gray-600 w-80">
       <h3 className="text-lg font-bold mb-3 text-cyan-400">魔法書</h3>
-      
+
       <div className="space-y-2 max-h-60 overflow-y-auto">
         {knownSpells.length === 0 ? (
           <p className="text-gray-400">習得済みの魔法がありません</p>
         ) : (
           knownSpells.map((spell: any) => (
-            <div 
+            <div
               key={spell.id}
               className={`p-2 border border-gray-700 rounded cursor-pointer hover:bg-gray-800 ${
-                selectedSpell === spell.id ? 'bg-blue-900' : ''
+                selectedSpell === spell.id ? "bg-blue-900" : ""
               }`}
               onClick={() => setSelectedSpell(spell.id)}
             >
@@ -38,7 +38,7 @@ const SpellBook: React.FC = () => {
               </div>
               <p className="text-xs text-gray-400 mt-1">{spell.description}</p>
               <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>射程: {spell.range === 0 ? '自分' : spell.range}</span>
+                <span>射程: {spell.range === 0 ? "自分" : spell.range}</span>
                 <span>Lv.{spell.level}</span>
               </div>
             </div>
@@ -49,7 +49,9 @@ const SpellBook: React.FC = () => {
       {selectedSpell && (
         <div className="mt-3 pt-3 border-t border-gray-600">
           <div className="flex justify-between items-center">
-            <span className="text-sm">現在MP: {player.mp}/{player.maxMp}</span>
+            <span className="text-sm">
+              現在MP: {player.mp}/{player.maxMp}
+            </span>
             <div className="space-x-2">
               <button
                 onClick={() => handleCastSpell(selectedSpell)}

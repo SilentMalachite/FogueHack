@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import { useGameState } from '../lib/stores/useGameState';
+import React, { useState } from "react";
+import { useGameState } from "../lib/stores/useGameState";
 
 const CraftingWorkshop: React.FC = () => {
   const { getAvailableRecipes, craftItem, canCraftItem, player, phase } = useGameState();
-  const [selectedCategory, setSelectedCategory] = useState<string>('weapon');
+  const [selectedCategory, setSelectedCategory] = useState<string>("weapon");
   const [selectedRecipe, setSelectedRecipe] = useState<string | null>(null);
 
-  if (phase !== 'playing') return null;
+  if (phase !== "playing") return null;
 
   const availableRecipes = getAvailableRecipes();
-  const categories = ['weapon', 'armor', 'potion', 'accessory'];
-  
-  const filteredRecipes = availableRecipes.filter((recipe: any) => 
-    recipe.category === selectedCategory
+  const categories = ["weapon", "armor", "potion", "accessory"];
+
+  const filteredRecipes = availableRecipes.filter(
+    (recipe: any) => recipe.category === selectedCategory,
   );
 
   const handleCraft = (recipeId: string) => {
@@ -26,38 +26,48 @@ const CraftingWorkshop: React.FC = () => {
 
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
-      case 'common': return '#FFFFFF';
-      case 'uncommon': return '#1EFF00';
-      case 'rare': return '#0070DD';
-      case 'epic': return '#A335EE';
-      case 'legendary': return '#FF8000';
-      default: return '#FFFFFF';
+      case "common":
+        return "#FFFFFF";
+      case "uncommon":
+        return "#1EFF00";
+      case "rare":
+        return "#0070DD";
+      case "epic":
+        return "#A335EE";
+      case "legendary":
+        return "#FF8000";
+      default:
+        return "#FFFFFF";
     }
   };
 
   return (
     <div className="fixed top-4 left-4 bg-black/90 text-white p-4 rounded border border-gray-600 w-96">
       <h3 className="text-lg font-bold mb-3 text-orange-400">合成工房</h3>
-      
+
       <div className="mb-3">
         <p className="text-sm text-gray-400">合成レベル: {player.craftingLevel}</p>
       </div>
 
       {/* カテゴリタブ */}
       <div className="flex mb-3 border-b border-gray-600">
-        {categories.map(category => (
+        {categories.map((category) => (
           <button
             key={category}
             onClick={() => setSelectedCategory(category)}
             className={`px-3 py-1 text-sm ${
-              selectedCategory === category 
-                ? 'text-orange-400 border-b-2 border-orange-400' 
-                : 'text-gray-400 hover:text-white'
+              selectedCategory === category
+                ? "text-orange-400 border-b-2 border-orange-400"
+                : "text-gray-400 hover:text-white"
             }`}
           >
-            {category === 'weapon' ? '武器' : 
-             category === 'armor' ? '防具' : 
-             category === 'potion' ? 'ポーション' : 'アクセサリ'}
+            {category === "weapon"
+              ? "武器"
+              : category === "armor"
+                ? "防具"
+                : category === "potion"
+                  ? "ポーション"
+                  : "アクセサリ"}
           </button>
         ))}
       </div>
@@ -70,15 +80,15 @@ const CraftingWorkshop: React.FC = () => {
           filteredRecipes.map((recipe: any) => {
             const craftCheck = getCraftCheck(recipe.id);
             return (
-              <div 
+              <div
                 key={recipe.id}
                 className={`p-2 border border-gray-700 rounded cursor-pointer hover:bg-gray-800 ${
-                  selectedRecipe === recipe.id ? 'bg-orange-900' : ''
-                } ${!craftCheck.canCraft ? 'opacity-50' : ''}`}
+                  selectedRecipe === recipe.id ? "bg-orange-900" : ""
+                } ${!craftCheck.canCraft ? "opacity-50" : ""}`}
                 onClick={() => setSelectedRecipe(recipe.id)}
               >
                 <div className="flex justify-between items-center">
-                  <span 
+                  <span
                     className="font-medium"
                     style={{ color: getRarityColor(recipe.result.rarity) }}
                   >
@@ -87,23 +97,21 @@ const CraftingWorkshop: React.FC = () => {
                   <span className="text-xs text-gray-400">Lv.{recipe.requiredLevel}</span>
                 </div>
                 <p className="text-xs text-gray-400 mt-1">{recipe.result.description}</p>
-                
+
                 {/* 必要素材 */}
                 <div className="text-xs text-gray-500 mt-1">
                   <span>必要素材: </span>
                   {recipe.materials.map((materialId: string, index: number) => (
                     <span key={index}>
                       {materialId}
-                      {index < recipe.materials.length - 1 ? ', ' : ''}
+                      {index < recipe.materials.length - 1 ? ", " : ""}
                     </span>
                   ))}
                 </div>
 
                 {/* 作成可能性 */}
                 {!craftCheck.canCraft && (
-                  <div className="text-xs text-red-400 mt-1">
-                    {craftCheck.missing.join(', ')}
-                  </div>
+                  <div className="text-xs text-red-400 mt-1">{craftCheck.missing.join(", ")}</div>
                 )}
               </div>
             );
@@ -116,9 +124,9 @@ const CraftingWorkshop: React.FC = () => {
         <h4 className="text-sm font-medium mb-2 text-gray-300">所持素材</h4>
         <div className="grid grid-cols-2 gap-1 text-xs">
           {player.inventory
-            .filter(item => item.type === 'material' || item.type === 'gem')
+            .filter((item) => item.type === "material" || item.type === "gem")
             .reduce((acc: any[], item) => {
-              const existing = acc.find(i => i.name === item.name);
+              const existing = acc.find((i) => i.name === item.name);
               if (existing) {
                 existing.count++;
               } else {
@@ -128,11 +136,12 @@ const CraftingWorkshop: React.FC = () => {
             }, [])
             .map((item: any) => (
               <div key={item.id} className="flex justify-between">
-                <span style={{ color: item.color }}>{item.symbol} {item.name}</span>
+                <span style={{ color: item.color }}>
+                  {item.symbol} {item.name}
+                </span>
                 <span className="text-gray-400">×{item.count}</span>
               </div>
-            ))
-          }
+            ))}
         </div>
       </div>
 

@@ -1,9 +1,83 @@
 // server/index.ts
 import express2 from "express";
+import helmet from "helmet";
+import cors from "cors";
+import rateLimit from "express-rate-limit";
 
 // server/routes.ts
 import { createServer } from "http";
+
+// server/storage.ts
+var MemStorage = class {
+  users;
+  currentId;
+  constructor() {
+    this.users = /* @__PURE__ */ new Map();
+    this.currentId = 1;
+  }
+  async getUser(id) {
+    return this.users.get(id);
+  }
+  async getUserByUsername(username) {
+    return Array.from(this.users.values()).find((user) => user.username === username);
+  }
+  async createUser(insertUser) {
+    const id = this.currentId++;
+    const user = { ...insertUser, id };
+    this.users.set(id, user);
+    return user;
+  }
+};
+var storage = new MemStorage();
+
+// shared/schema.ts
+import { pgTable, text, serial } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+var users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull()
+});
+var insertUserSchema = createInsertSchema(users).pick({
+  username: true,
+  password: true
+});
+
+// server/routes.ts
 async function registerRoutes(app2) {
+  app2.get("/api/health", (_req, res) => {
+    res.json({ ok: true });
+  });
+  app2.post("/api/users", async (req, res) => {
+    const parse = insertUserSchema.safeParse(req.body);
+    if (!parse.success) {
+      return res.status(400).json({ message: "Invalid payload" });
+    }
+    const { username } = parse.data;
+    const existing = await storage.getUserByUsername(username);
+    if (existing) {
+      return res.status(409).json({ message: "Username already exists" });
+    }
+    const created = await storage.createUser(parse.data);
+    const { password: _pw, ...publicUser } = created;
+    return res.status(201).json(publicUser);
+  });
+  app2.get("/api/users/:id", async (req, res) => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ message: "Invalid id" });
+    }
+    const user = await storage.getUser(id);
+    if (!user) return res.status(404).json({ message: "Not found" });
+    const { password: _pw, ...publicUser } = user;
+    return res.json(publicUser);
+  });
+  app2.get("/api/users/by-username/:username", async (req, res) => {
+    const user = await storage.getUserByUsername(req.params.username);
+    if (!user) return res.status(404).json({ message: "Not found" });
+    const { password: _pw, ...publicUser } = user;
+    return res.json(publicUser);
+  });
   const httpServer = createServer(app2);
   return httpServer;
 }
@@ -21,15 +95,12 @@ import react from "@vitejs/plugin-react";
 import path, { dirname } from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import { fileURLToPath } from "url";
-import glsl from "vite-plugin-glsl";
 var __filename = fileURLToPath(import.meta.url);
 var __dirname = dirname(__filename);
 var vite_config_default = defineConfig({
   plugins: [
     react(),
-    runtimeErrorOverlay(),
-    glsl()
-    // Add GLSL shader support
+    runtimeErrorOverlay()
   ],
   resolve: {
     alias: {
@@ -83,17 +154,9 @@ async function setupVite(app2, server) {
   app2.use("*", async (req, res, next) => {
     const url = req.originalUrl;
     try {
-      const clientTemplate = path2.resolve(
-        __dirname2,
-        "..",
-        "client",
-        "index.html"
-      );
+      const clientTemplate = path2.resolve(__dirname2, "..", "client", "index.html");
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
-      template = template.replace(
-        `src="/src/main.tsx"`,
-        `src="/src/main.tsx?v=${nanoid()}"`
-      );
+      template = template.replace(`src="/src/main.tsx"`, `src="/src/main.tsx?v=${nanoid()}"`);
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
@@ -109,16 +172,92 @@ function serveStatic(app2) {
       `Could not find the build directory: ${distPath}, make sure to build the client first`
     );
   }
-  app2.use(express.static(distPath));
+  const assetsPath = path2.resolve(distPath, "assets");
+  if (fs.existsSync(assetsPath)) {
+    app2.use(
+      "/assets",
+      express.static(assetsPath, {
+        etag: false,
+        lastModified: false,
+        setHeaders: (res) => {
+          res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        }
+      })
+    );
+  }
+  const soundsPath = path2.resolve(distPath, "sounds");
+  if (fs.existsSync(soundsPath)) {
+    app2.use(
+      "/sounds",
+      express.static(soundsPath, {
+        setHeaders: (res) => {
+          res.setHeader("Cache-Control", "public, max-age=604800");
+        }
+      })
+    );
+  }
+  app2.use(
+    express.static(distPath, {
+      setHeaders: (res, filePath) => {
+        if (path2.basename(filePath) === "index.html") {
+          res.setHeader("Cache-Control", "no-store");
+          res.removeHeader("ETag");
+          res.removeHeader("Last-Modified");
+        } else {
+          res.setHeader("Cache-Control", "public, max-age=3600");
+        }
+      }
+    })
+  );
   app2.use("*", (_req, res) => {
+    res.setHeader("Cache-Control", "no-store");
     res.sendFile(path2.resolve(distPath, "index.html"));
   });
 }
 
 // server/index.ts
 var app = express2();
+app.set("etag", "strong");
+app.use(helmet());
+app.use(
+  cors({
+    origin: true,
+    credentials: true
+  })
+);
+app.use(
+  rateLimit({
+    windowMs: 60 * 1e3,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false
+  })
+);
 app.use(express2.json());
 app.use(express2.urlencoded({ extended: false }));
+function maskSensitive(value) {
+  const SENSITIVE_KEYS = /* @__PURE__ */ new Set([
+    "password",
+    "pass",
+    "token",
+    "authorization",
+    "auth",
+    "secret"
+  ]);
+  const mask = (v) => {
+    if (v == null) return v;
+    if (Array.isArray(v)) return v.map(mask);
+    if (typeof v === "object") {
+      const out = {};
+      for (const [k, val] of Object.entries(v)) {
+        out[k] = SENSITIVE_KEYS.has(k.toLowerCase()) ? "***" : mask(val);
+      }
+      return out;
+    }
+    return v;
+  };
+  return mask(value);
+}
 app.use((req, res, next) => {
   const start = Date.now();
   const path3 = req.path;
@@ -133,7 +272,12 @@ app.use((req, res, next) => {
     if (path3.startsWith("/api")) {
       let logLine = `${req.method} ${path3} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+        try {
+          const masked = maskSensitive(capturedJsonResponse);
+          logLine += ` :: ${JSON.stringify(masked)}`;
+        } catch (_) {
+          logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+        }
       }
       if (logLine.length > 80) {
         logLine = logLine.slice(0, 79) + "\u2026";
@@ -149,19 +293,25 @@ app.use((req, res, next) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
     res.status(status).json({ message });
-    throw err;
+    try {
+      log(`error ${status}: ${message}`);
+    } catch (_) {
+    }
   });
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
-  const port = 5e3;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true
-  }, () => {
-    log(`serving on port ${port}`);
-  });
+  const port = Number(process.env.PORT) || 5e3;
+  server.listen(
+    {
+      port,
+      host: "0.0.0.0",
+      reusePort: true
+    },
+    () => {
+      log(`serving on port ${port}`);
+    }
+  );
 })();

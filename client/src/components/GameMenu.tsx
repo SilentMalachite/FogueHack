@@ -1,6 +1,6 @@
-import React from 'react';
-import { useGameState } from '../lib/stores/useGameState';
-import { messages } from '../lib/japanese';
+import React from "react";
+import { useGameState } from "../lib/stores/useGameState";
+import { messages } from "../lib/japanese";
 
 const GameMenu: React.FC = () => {
   const { startNewGame, loadGame, phase } = useGameState();
@@ -13,18 +13,14 @@ const GameMenu: React.FC = () => {
     loadGame();
   };
 
-  if (phase !== 'menu') return null;
+  if (phase !== "menu") return null;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black text-green-400 font-mono">
       <div className="text-center">
-        <h1 className="text-6xl font-bold mb-8 text-green-300">
-          FogueHack
-        </h1>
-        <p className="text-xl mb-12 text-green-500">
-          ASCII ローグライク RPG
-        </p>
-        
+        <h1 className="text-6xl font-bold mb-8 text-green-300">FogueHack</h1>
+        <p className="text-xl mb-12 text-green-500">ASCII ローグライク RPG</p>
+
         <div className="space-y-4">
           <button
             onClick={handleNewGame}
@@ -32,7 +28,7 @@ const GameMenu: React.FC = () => {
           >
             {messages.newGame}
           </button>
-          
+
           <button
             onClick={handleLoadGame}
             className="block w-64 mx-auto py-3 px-6 text-xl border-2 border-green-400 hover:bg-green-400 hover:text-black transition-colors"

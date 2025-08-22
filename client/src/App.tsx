@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useAudio } from './lib/stores/useAudio';
-import Game from './components/Game';
-import '@fontsource/inter';
+import React, { useEffect } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useAudio } from "./lib/stores/useAudio";
+import Game from "./components/Game";
+import "@fontsource/inter/latin.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -15,27 +15,27 @@ const queryClient = new QueryClient({
 
 // Sound Manager Component
 const SoundManager: React.FC = () => {
-  const { 
-    setHitSound, 
-    setSuccessSound, 
-    setBackgroundMusic, 
-    setLevelUpSound, 
-    setDeathSound, 
+  const {
+    setHitSound,
+    setSuccessSound,
+    setBackgroundMusic,
+    setLevelUpSound,
+    setDeathSound,
     setMoveSound,
-    playBackgroundMusic 
+    playBackgroundMusic,
   } = useAudio();
 
   useEffect(() => {
     // Load all sounds
-    const hitAudio = new Audio('/sounds/hit.mp3');
-    const successAudio = new Audio('/sounds/success.mp3');
-    const backgroundAudio = new Audio('/sounds/background.mp3');
-    
+    const hitAudio = new Audio("/sounds/hit.mp3");
+    const successAudio = new Audio("/sounds/success.mp3");
+    const backgroundAudio = new Audio("/sounds/background.mp3");
+
     // Create additional sounds using existing ones
-    const levelUpAudio = new Audio('/sounds/success.mp3');
-    const deathAudio = new Audio('/sounds/hit.mp3');
-    const moveAudio = new Audio('/sounds/hit.mp3');
-    
+    const levelUpAudio = new Audio("/sounds/success.mp3");
+    const deathAudio = new Audio("/sounds/hit.mp3");
+    const moveAudio = new Audio("/sounds/hit.mp3");
+
     // Set volumes
     hitAudio.volume = 0.3;
     successAudio.volume = 0.5;
@@ -53,7 +53,15 @@ const SoundManager: React.FC = () => {
     setMoveSound(moveAudio);
 
     // Don't auto-start background music - wait for user interaction
-  }, [setHitSound, setSuccessSound, setBackgroundMusic, setLevelUpSound, setDeathSound, setMoveSound, playBackgroundMusic]);
+  }, [
+    setHitSound,
+    setSuccessSound,
+    setBackgroundMusic,
+    setLevelUpSound,
+    setDeathSound,
+    setMoveSound,
+    playBackgroundMusic,
+  ]);
 
   return null;
 };

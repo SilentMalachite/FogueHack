@@ -1,6 +1,6 @@
-import React from 'react';
-import { useGameState } from '../lib/stores/useGameState';
-import { Quest } from '../lib/questSystem';
+import React from "react";
+import { useGameState } from "../lib/stores/useGameState";
+import { Quest } from "../lib/questSystem";
 
 interface QuestLogProps {
   onClose: () => void;
@@ -19,12 +19,13 @@ export const QuestLog: React.FC<QuestLogProps> = ({ onClose }) => {
   };
 
   const renderQuestObjectives = (quest: Quest) => {
-    return quest.objectives.map(objective => (
-      <div 
-        key={objective.id} 
-        className={`text-sm ml-4 ${objective.completed ? 'text-green-300' : 'text-yellow-300'}`}
+    return quest.objectives.map((objective) => (
+      <div
+        key={objective.id}
+        className={`text-sm ml-4 ${objective.completed ? "text-green-300" : "text-yellow-300"}`}
       >
-        {objective.completed ? '✓' : '○'} {objective.description} ({objective.current}/{objective.required})
+        {objective.completed ? "✓" : "○"} {objective.description} ({objective.current}/
+        {objective.required})
       </div>
     ));
   };
@@ -32,20 +33,23 @@ export const QuestLog: React.FC<QuestLogProps> = ({ onClose }) => {
   const renderQuestRewards = (quest: Quest) => {
     return (
       <div className="text-sm text-blue-300 ml-4">
-        報酬: {quest.rewards.map(reward => {
-          switch (reward.type) {
-            case 'exp':
-              return `経験値+${reward.value}`;
-            case 'gold':
-              return `ゴールド+${reward.value}`;
-            case 'item':
-              return `アイテム`;
-            case 'spell':
-              return `新魔法`;
-            default:
-              return '';
-          }
-        }).join(', ')}
+        報酬:{" "}
+        {quest.rewards
+          .map((reward) => {
+            switch (reward.type) {
+              case "exp":
+                return `経験値+${reward.value}`;
+              case "gold":
+                return `ゴールド+${reward.value}`;
+              case "item":
+                return `アイテム`;
+              case "spell":
+                return `新魔法`;
+              default:
+                return "";
+            }
+          })
+          .join(", ")}
       </div>
     );
   };
@@ -102,13 +106,9 @@ export const QuestLog: React.FC<QuestLogProps> = ({ onClose }) => {
                   <div key={quest.id} className="bg-gray-700 p-3 rounded border border-yellow-300">
                     <h4 className="font-bold text-yellow-300 mb-2">{quest.title}</h4>
                     <p className="text-sm text-gray-300 mb-2">{quest.description}</p>
-                    <div className="mb-2">
-                      {renderQuestObjectives(quest)}
-                    </div>
+                    <div className="mb-2">{renderQuestObjectives(quest)}</div>
                     {quest.timeLimit && (
-                      <div className="text-xs text-red-400">
-                        制限時間: {quest.timeLimit}ターン
-                      </div>
+                      <div className="text-xs text-red-400">制限時間: {quest.timeLimit}ターン</div>
                     )}
                   </div>
                 ))
@@ -127,9 +127,7 @@ export const QuestLog: React.FC<QuestLogProps> = ({ onClose }) => {
                   <div key={quest.id} className="bg-gray-700 p-3 rounded border border-green-300">
                     <h4 className="font-bold text-green-300 mb-2">{quest.title}</h4>
                     <p className="text-sm text-gray-300 mb-2">{quest.description}</p>
-                    <div className="text-sm text-green-400">
-                      ✓ 完了
-                    </div>
+                    <div className="text-sm text-green-400">✓ 完了</div>
                   </div>
                 ))
               )}
@@ -139,7 +137,9 @@ export const QuestLog: React.FC<QuestLogProps> = ({ onClose }) => {
 
         <div className="mt-6 pt-4 border-t border-gray-600">
           <div className="text-sm text-gray-400">
-            <p><strong>操作方法:</strong></p>
+            <p>
+              <strong>操作方法:</strong>
+            </p>
             <p>• Qキー: クエストログを開く/閉じる</p>
             <p>• 受諾ボタン: 新しいクエストを開始</p>
             <p>• 進行中のクエストは自動的に進捗が更新されます</p>

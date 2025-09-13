@@ -117,14 +117,16 @@ app.use((req, res, next) => {
   // Serve API and client
   // Respect PORT env var if provided, fallback to 5000
   const port = Number(process.env.PORT) || 5000;
-  server.listen(
-    {
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    },
-    () => {
-      log(`serving on port ${port}`);
-    },
-  );
+  const listenOptions: { port: number; host: string; reusePort?: boolean } = {
+    port,
+    host: "0.0.0.0",
+  };
+  // SO_REUSEPORT is not supported on Windows; avoid ENOTSUP
+  if (process.platform !== "win32") {
+    listenOptions.reusePort = true;
+  }
+
+  server.listen(listenOptions, () => {
+    log(`serving on port ${port}`);
+  });
 })();

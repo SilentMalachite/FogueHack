@@ -61,8 +61,11 @@ cd FogueHack
 # 依存関係をインストール
 npm install
 
-# 開発サーバーを起動（`PORT`を指定可能。未指定は5000）
-PORT=5000 npm run dev
+# 開発サーバーを起動
+# macOS/Linux: PORT=5000 npm run dev
+# Windows (PowerShell): $env:PORT=5000; npm run dev
+# Windows (cmd.exe): set PORT=5000 && npm run dev
+npm run dev
 ```
 
 ブラウザで `http://localhost:5000`（もしくは指定したポート）にアクセスしてゲームを開始できます。
@@ -76,6 +79,7 @@ PORT=5000 npm run dev
 - 機密情報は `.env` にのみ記述し、Gitに含めない（`.gitignore` 済み）。
 - 共有時は `.env.example` を更新し、必要なキーを網羅する。
 - 本番ビルドは `npm run build && npm start`（`NODE_ENV=production`）。開発は `npm run dev`。
+- Windows では `npm start` 内で `cross-env` を使って環境変数を設定しています。
 
 ## 🎮 操作方法
 

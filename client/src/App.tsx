@@ -34,7 +34,7 @@ const SoundManager: React.FC = () => {
     // Create additional sounds using existing ones
     const levelUpAudio = new Audio("/sounds/success.mp3");
     const deathAudio = new Audio("/sounds/hit.mp3");
-    const moveAudio = new Audio("/sounds/hit.mp3");
+    const moveAudio = new Audio("/sounds/move.mp3");
 
     // Set volumes
     hitAudio.volume = 0.3;

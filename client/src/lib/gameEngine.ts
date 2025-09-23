@@ -74,6 +74,8 @@ export class GameEngine {
       if (position) {
         const monster = this.createRandomMonster(position);
         this.gameState.monsters.push(monster);
+      } else {
+        console.warn(`Could not find empty position for monster ${i + 1}/${monsterCount}`);
       }
     }
 
@@ -85,6 +87,8 @@ export class GameEngine {
         const positionKey = `${position.x},${position.y}`;
         this.gameState.items.set(item.id, item);
         this.gameState.itemPositions.set(positionKey, position);
+      } else {
+        console.warn(`Could not find empty position for item ${i + 1}/${itemCount}`);
       }
     }
   }
@@ -108,7 +112,12 @@ export class GameEngine {
         (m) => m.position.x === position.x && m.position.y === position.y,
       );
 
-      if (!monsterExists) {
+      // アイテムの位置でないかチェック
+      const itemExists = Array.from(this.gameState.itemPositions.values()).some(
+        (itemPos) => itemPos.x === position.x && itemPos.y === position.y,
+      );
+
+      if (!monsterExists && !itemExists) {
         return position;
       }
     }
@@ -228,11 +237,11 @@ export class GameEngine {
     return {
       id: `item_${Date.now()}_${Math.random()}`,
       name: type.name,
-      type: type.type as any,
+      type: type.type as "weapon" | "armor" | "potion",
       symbol: type.symbol,
       color: type.color,
       value: type.value,
-      effects: type.effects as any,
+      effects: type.effects as Array<{ type: "heal" | "attack" | "defense" | "mana" | "speed" | "luck" | "magic_power"; value: number }>,
     };
   }
 
@@ -322,19 +331,22 @@ export class GameEngine {
 
     // アイテムを見つける
     let itemToPickup: Item | null = null;
-    const itemEntries = Array.from(this.gameState.items.entries());
-    for (const [itemId, item] of itemEntries) {
+    let itemIdToDelete: string | null = null;
+
+    for (const [itemId, item] of Array.from(this.gameState.items.entries())) {
       const itemPos = Array.from(this.gameState.itemPositions.entries()).find(
         ([key, pos]) => pos.x === position.x && pos.y === position.y,
       );
       if (itemPos) {
         itemToPickup = item;
-        this.gameState.items.delete(itemId);
+        itemIdToDelete = itemId;
         break;
       }
     }
 
-    if (itemToPickup) {
+    if (itemToPickup && itemIdToDelete) {
+      this.gameState.items.delete(itemIdToDelete);
+
       if (this.gameState.player.inventory.length < 20) {
         this.gameState.player.inventory.push(itemToPickup);
         this.addMessage(
@@ -355,11 +367,14 @@ export class GameEngine {
       1,
       this.gameState.player.attack - monster.defense + Math.floor(Math.random() * 5),
     );
-    monster.hp -= playerDamage;
+
+    // ダメージが負の値にならないようにする
+    const actualPlayerDamage = Math.max(0, playerDamage);
+    monster.hp -= actualPlayerDamage;
 
     const monsterName =
       messages.monsters[monster.name as keyof typeof messages.monsters] || monster.name;
-    this.addMessage(messages.youAttack(monsterName, playerDamage));
+    this.addMessage(messages.youAttack(monsterName, actualPlayerDamage));
 
     if (monster.hp <= 0) {
       // モンスター撃破
@@ -406,8 +421,11 @@ export class GameEngine {
       1,
       monster.attack - this.gameState.player.defense + Math.floor(Math.random() * 3),
     );
-    this.gameState.player.hp -= monsterDamage;
-    this.addMessage(messages.monsterAttacks(monsterName, monsterDamage));
+
+    // ダメージが負の値にならないようにする
+    const actualMonsterDamage = Math.max(0, monsterDamage);
+    this.gameState.player.hp -= actualMonsterDamage;
+    this.addMessage(messages.monsterAttacks(monsterName, actualMonsterDamage));
 
     if (this.gameState.player.hp <= 0) {
       this.gameState.phase = "dead";
@@ -668,11 +686,12 @@ export class GameEngine {
 
       this.gameState = {
         ...parsed,
-        items: new Map(parsed.items),
-        itemPositions: new Map(parsed.itemPositions),
+        items: new Map(parsed.items || []),
+        itemPositions: new Map(parsed.itemPositions || []),
       };
       return { ...this.gameState };
-    } catch {
+    } catch (error) {
+      console.error("Save data load error:", error);
       return null;
     }
   }
@@ -771,17 +790,13 @@ export class GameEngine {
   }
 
   // 合成レシピ一覧取得
-  getAvailableRecipes(): any[] {
+  getAvailableRecipes() {
     return this.craftingSystem.getAvailableRecipes(this.gameState.player.craftingLevel);
   }
 
   // 合成可能性チェック
   canCraftItem(recipeId: string): { canCraft: boolean; missing: string[] } {
     return this.craftingSystem.canCraft(recipeId, this.gameState.player);
-  }
-
-  getGameState(): GameState {
-    return { ...this.gameState };
   }
 
   // クエストシステムメソッド
@@ -795,6 +810,10 @@ export class GameEngine {
 
   getCompletedQuests() {
     return this.questSystem.getCompletedQuests();
+  }
+
+  getGameState(): GameState {
+    return { ...this.gameState };
   }
 
   acceptQuest(questId: string): boolean {

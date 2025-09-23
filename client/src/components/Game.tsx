@@ -32,105 +32,112 @@ const Game: React.FC = () => {
       if (phase === "menu") return;
 
       const key = event.key.toLowerCase();
+      const { ctrlKey, shiftKey } = event;
 
-      // 移動キー
+      // 1) 修飾キー動作（移動と競合しないように先に処理）
+      if (ctrlKey) {
+        if (key === "s") {
+          event.preventDefault();
+          saveGame();
+          return;
+        }
+        if (key === "l") {
+          event.preventDefault();
+          loadGame();
+          return;
+        }
+        if (key === "r") {
+          event.preventDefault();
+          startNewGame();
+          return;
+        }
+      }
+
+      if (shiftKey) {
+        if (key === "c") {
+          event.preventDefault();
+          setShowCrafting((v) => !v);
+          return;
+        }
+        if (key === "q") {
+          event.preventDefault();
+          setShowQuestLog((v) => !v);
+          return;
+        }
+      }
+
+      // 2) 移動キー（無修飾）
       switch (key) {
         case "w":
         case "arrowup":
           event.preventDefault();
           movePlayer("north");
-          break;
+          return;
         case "s":
         case "arrowdown":
           event.preventDefault();
           movePlayer("south");
-          break;
+          return;
         case "a":
         case "arrowleft":
           event.preventDefault();
           movePlayer("west");
-          break;
+          return;
         case "d":
         case "arrowright":
           event.preventDefault();
           movePlayer("east");
-          break;
+          return;
         case "q":
           event.preventDefault();
           movePlayer("northwest");
-          break;
+          return;
         case "e":
           event.preventDefault();
           movePlayer("northeast");
-          break;
+          return;
         case "z":
           event.preventDefault();
           movePlayer("southwest");
-          break;
+          return;
         case "c":
           event.preventDefault();
           movePlayer("southeast");
-          break;
+          return;
       }
 
-      // アクションキー
+      // 3) 非移動の単独キー
       switch (key) {
         case "h":
           event.preventDefault();
           castHeal();
-          break;
+          return;
         case "f":
           event.preventDefault();
           castFireball();
-          break;
+          return;
         case "i":
           event.preventDefault();
           toggleInventory();
-          break;
-        case "s":
-          if (event.ctrlKey || phase === "playing") {
-            event.preventDefault();
-            saveGame();
-          }
-          break;
-        case "l":
-          if (event.ctrlKey || phase === "playing") {
-            event.preventDefault();
-            loadGame();
-          }
-          break;
+          return;
         case "m":
           event.preventDefault();
           toggleMute();
-          break;
+          return;
         case "b":
           event.preventDefault();
           toggleMusic();
-          break;
+          return;
         case "p":
           event.preventDefault();
-          setShowSpellBook(!showSpellBook);
-          break;
-        case "c":
-          event.preventDefault();
-          setShowCrafting(!showCrafting);
-          break;
-        case "q":
-          event.preventDefault();
-          setShowQuestLog(!showQuestLog);
-          break;
-        case "r":
-          if (event.ctrlKey || phase === "dead") {
-            event.preventDefault();
-            startNewGame();
-          }
-          break;
+          setShowSpellBook((v) => !v);
+          return;
         case "escape":
           if (phase === "inventory") {
             event.preventDefault();
             toggleInventory();
           }
-          break;
+          return;
       }
     },
     [

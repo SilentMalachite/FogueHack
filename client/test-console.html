@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FogueHack テストコンソール</title>
+    <style>
+      body { font-family: "Courier New", monospace; background: #000; color: #0f0; margin: 0; padding: 20px; line-height: 1.4; }
+      .container { max-width: 1200px; margin: 0 auto; }
+      .test-section { border: 1px solid #0f0; margin: 20px 0; padding: 15px; border-radius: 5px; }
+      button { background: #001100; color: #0f0; border: 1px solid #0f0; padding: 10px 20px; margin: 5px; cursor: pointer; border-radius: 3px; font-family: inherit; }
+      button:hover { background: #002200; }
+      .output { background: #001100; border: 1px solid #004400; padding: 10px; margin: 10px 0; white-space: pre-wrap; max-height: 400px; overflow-y: auto; border-radius: 3px; }
+      .success { color: #00ff00; }
+      .error { color: #ff4444; }
+      .warning { color: #ffaa00; }
+      .info { color: #4499ff; }
+    </style>
+    <!-- Vite経由で必要モジュールを読み込み、グローバル関数を公開する -->
+    <script type="module" src="/src/globalExpose.ts"></script>
+    <script type="module" src="/src/testRunner.ts"></script>
+    <script type="module" src="/src/errorDetection.ts"></script>
+    <script type="module" src="/src/finalValidation.ts"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎮 FogueHack テストコンソール</h1>
+      <p>このコンソールを使用して、FogueHackゲームの各システムをテストできます。</p>
+
+      <div class="test-section">
+        <h2>📋 基本テスト</h2>
+        <button onclick="runBasicTests()">基本機能テスト実行</button>
+        <button onclick="testGameFlow()">ゲームフローテスト</button>
+        <button onclick="testAllSystems()">全システムテスト</button>
+        <div id="basic-output" class="output"></div>
+      </div>
+
+      <div class="test-section">
+        <h2>🔧 エラー検出・修正</h2>
+        <button onclick="runErrorDetection()">エラー検出実行</button>
+        <button onclick="runErrorFixes()">エラー修正実行</button>
+        <button onclick="validateFinal()">最終検証実行</button>
+        <div id="error-output" class="output"></div>
+      </div>
+
+      <div class="test-section">
+        <h2>🎯 個別システムテスト</h2>
+        <button onclick="testMagicSystem()">魔法システム</button>
+        <button onclick="testQuestSystem()">クエストシステム</button>
+        <button onclick="testCraftingSystem()">合成システム</button>
+        <button onclick="testCombatSystem()">戦闘システム</button>
+        <div id="system-output" class="output"></div>
+      </div>
+
+      <div class="test-section">
+        <h2>💾 データテスト</h2>
+        <button onclick="testSaveLoad()">セーブ/ロード</button>
+        <button onclick="testDataIntegrity()">データ整合性</button>
+        <button onclick="testPerformance()">パフォーマンス</button>
+        <div id="data-output" class="output"></div>
+      </div>
+
+      <div class="test-section">
+        <h2>📊 テスト結果サマリー</h2>
+        <button onclick="generateReport()">完全テストレポート生成</button>
+        <button onclick="clearAllOutputs()">出力クリア</button>
+        <div id="summary-output" class="output"></div>
+      </div>
+    </div>
+
+    <script>
+      function output(elementId, message, type = "info") {
+        const element = document.getElementById(elementId);
+        const timestamp = new Date().toLocaleTimeString();
+        const className = type;
+        element.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+        element.scrollTop = element.scrollHeight;
+      }
+
+      function clearOutput(elementId) { document.getElementById(elementId).innerHTML = ""; }
+      function clearAllOutputs() { ["basic-output","error-output","system-output","data-output","summary-output"].forEach(clearOutput); }
+
+      async function runBasicTests() {
+        clearOutput("basic-output");
+        output("basic-output","基本テスト開始...","info");
+        try {
+          if (typeof window.useGameState === "undefined") throw new Error("useGameState が定義されていません");
+          const gameState = window.useGameState.getState();
+          if (!gameState.gameEngine) throw new Error("ゲームエンジンが初期化されていません");
+          output("basic-output","ゲームエンジン初期化 ✅","success");
+          gameState.startNewGame();
+          if (gameState.phase !== "playing") throw new Error("ゲーム開始に失敗しました");
+          output("basic-output","ゲーム開始 ✅","success");
+          if (!gameState.player) throw new Error("プレイヤーが作成されていません");
+          output("basic-output",`プレイヤー作成 ✅ (Lv.${gameState.player.level}, HP:${gameState.player.hp}/${gameState.player.maxHp})`,`success");
+          if (!gameState.dungeon || gameState.dungeon.length === 0) throw new Error("ダンジョンが生成されていません");
+          output("basic-output",`ダンジョン生成 ✅ (${gameState.dungeon.length}x${gameState.dungeon[0].length})`,`success");
+          output("basic-output","基本テスト完了 🎉","success");
+        } catch (e) { output("basic-output",`基本テスト失敗: ${e.message}`,"error"); }
+      }
+
+      async function testGameFlow() {
+        clearOutput("basic-output");
+        output("basic-output","ゲームフローテスト開始...","info");
+        try {
+          const gameState = window.useGameState.getState();
+          gameState.startNewGame();
+          const directions = ["north","south","east","west"]; let moveCount=0;
+          for (const d of directions) { try { gameState.movePlayer(d); moveCount++; output("basic-output",`${d}方向移動 ✅","success"); } catch(err) { output("basic-output",`${d}方向移動 ❌ (${err.message})","warning"); } }
+          output("basic-output",`移動テスト完了: ${moveCount}/4方向成功`, moveCount>0?"success":"error");
+          try { gameState.castHeal(); output("basic-output","ヒール魔法 ✅","success"); } catch(err) { output("basic-output",`ヒール魔法 ❌ (${err.message})","warning"); }
+          try { gameState.toggleInventory(); output("basic-output","インベントリ操作 ✅","success"); } catch(err) { output("basic-output",`インベントリ操作 ❌ (${err.message})","error"); }
+          output("basic-output","ゲームフローテスト完了 🎉","success");
+        } catch(e) { output("basic-output",`ゲームフローテスト失敗: ${e.message}`,"error"); }
+      }
+
+      async function testAllSystems() {
+        clearOutput("basic-output");
+        output("basic-output","全システムテスト開始...","info");
+        const tests=[{name:"魔法システム",fn:()=>testMagicSystemInternal()},{name:"クエストシステム",fn:()=>testQuestSystemInternal()},{name:"合成システム",fn:()=>testCraftingSystemInternal()},{name:"セーブ/ロード",fn:()=>testSaveLoadInternal()}];
+        let passed=0; for(const t of tests){ try{ await t.fn(); output("basic-output",`${t.name} ✅","success"); passed++; }catch(err){ output("basic-output",`${t.name} ❌ (${err.message})","error"); } }
+        output("basic-output",`全システムテスト完了: ${passed}/${tests.length}`, passed===tests.length?"success":"error");
+      }
+
+      function testMagicSystemInternal(){ const s=window.useGameState.getState(); s.startNewGame(); const ks=s.getKnownSpells(); if(!ks||ks.length===0) throw new Error("習得済み魔法がありません"); const p=s.player; p.hp=Math.floor(p.maxHp*0.5); s.castHeal(); if(p.hp<=Math.floor(p.maxHp*0.5)) throw new Error("ヒール効果が適用されていません"); return `魔法システム正常 (${ks.length}個の魔法利用可能)`; }
+      function testQuestSystemInternal(){ const s=window.useGameState.getState(); s.startNewGame(); const aq=s.getAvailableQuests(); if(!aq||aq.length===0) throw new Error("利用可能なクエストがありません"); const ok=s.acceptQuest(aq[0].id); if(!ok) throw new Error("クエスト受諾に失敗しました"); return `クエストシステム正常 (${aq.length}個のクエスト利用可能)`; }
+      function testCraftingSystemInternal(){ const s=window.useGameState.getState(); s.startNewGame(); const r=s.getAvailableRecipes(); if(!r||r.length===0) throw new Error("利用可能なレシピがありません"); const ck=s.canCraftItem(r[0].id); if(typeof ck.canCraft!=="boolean") throw new Error("合成チェック機能が正常に動作していません"); return `合成システム正常 (${r.length}個のレシピ利用可能)`; }
+      function testSaveLoadInternal(){ const s=window.useGameState.getState(); s.startNewGame(); const lv=s.player.level, g=s.player.gold, ph=s.phase; s.saveGame(); s.loadGame(); const ok=(lv===s.player.level&&g===s.player.gold&&ph===s.phase); return ok?"セーブ/ロードデータ整合性確認完了 ✅":"セーブ/ロードデータに差異があります"; }
+
+      async function testMagicSystem(){ clearOutput("system-output"); output("system-output","魔法システムテスト開始...","info"); try{ const r=testMagicSystemInternal(); output("system-output",r,"success"); }catch(e){ output("system-output",`魔法システムエラー: ${e.message}`,"error"); } }
+      async function testQuestSystem(){ clearOutput("system-output"); output("system-output","クエストシステムテスト開始...","info"); try{ const r=testQuestSystemInternal(); output("system-output",r,"success"); }catch(e){ output("system-output",`クエストシステムエラー: ${e.message}`,"error"); } }
+      async function testCraftingSystem(){ clearOutput("system-output"); output("system-output","合成システムテスト開始...","info"); try{ const r=testCraftingSystemInternal(); output("system-output",r,"success"); }catch(e){ output("system-output",`合成システムエラー: ${e.message}`,"error"); } }
+      async function testCombatSystem(){ clearOutput("system-output"); output("system-output","戦闘システムテスト開始...","info"); try{ const s=window.useGameState.getState(); s.startNewGame(); if(s.monsters.length===0) throw new Error("モンスターが生成されていません"); output("system-output",`戦闘システム正常 (${s.monsters.length}体のモンスター生成)`,`success`); }catch(e){ output("system-output",`戦闘システムエラー: ${e.message}`,"error"); } }
+
+      async function testSaveLoad(){ clearOutput("data-output"); output("data-output","セーブ/ロードテスト開始...","info"); try{ const r=testSaveLoadInternal(); output("data-output",r,"success"); }catch(e){ output("data-output",`セーブ/ロードエラー: ${e.message}`,"error"); } }
+      async function testDataIntegrity(){ clearOutput("data-output"); output("data-output","データ整合性テスト開始...","info"); try{ const s=window.useGameState.getState(); s.startNewGame(); if(s.player.hp<=0||s.player.hp>s.player.maxHp) throw new Error("プレイヤーHP値が不正です"); if(s.player.level<1) throw new Error("プレイヤーレベルが不正です"); if(s.dungeon.length===0||s.dungeon[0].length===0) throw new Error("ダンジョンサイズが不正です"); output("data-output","データ整合性確認完了 ✅","success"); }catch(e){ output("data-output",`データ整合性エラー: ${e.message}`,"error"); } }
+      async function testPerformance(){ clearOutput("data-output"); output("data-output","パフォーマンステスト開始...","info"); const t0=performance.now(); try{ const s=window.useGameState.getState(); for(let i=0;i<100;i++){ s.movePlayer(["north","south","east","west"][i%4]); } const dt=(performance.now()-t0).toFixed(1); output("data-output",`移動100回処理時間: ${dt}ms`,`success`); }catch(e){ output("data-output",`パフォーマンスエラー: ${e.message}`,"error"); } }
+
+      function generateReport(){ clearOutput("summary-output"); if (typeof window.runGameTests === "function") { const results = window.runGameTests(); results.forEach(r=>{ output("summary-output",`${r.passed?"✅":"❌"} ${r.name} ${r.details?"- "+r.details:""}`, r.passed?"success":"error"); }); } else { output("summary-output","テストランナーが読み込まれていません","error"); } }
+
+      async function runErrorDetection(){ clearOutput("error-output"); if(typeof window.runErrorDetection==="function"){ await window.runErrorDetection(); output("error-output","エラー検出完了","success"); } else { output("error-output","エラー検出スクリプトが見つかりません","error"); } }
+      async function runErrorFixes(){ clearOutput("error-output"); output("error-output","（デモ）自動修正は別途実装対象","warning"); }
+      async function validateFinal(){ clearOutput("error-output"); if(typeof window.runFinalValidation==="function"){ await window.runFinalValidation(); output("error-output","最終検証完了","success"); } else { output("error-output","最終検証スクリプトが見つかりません","error"); } }
+    </script>
+  </body>
+  </html>
+

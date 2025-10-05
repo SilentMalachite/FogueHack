@@ -259,15 +259,21 @@ export class SpellSystem {
 
               if (targetMonster.hp <= 0) {
                 this.killMonster(targetMonster, newGameState);
+                // Quest progress is handled in GameEngine.castSpell
               }
             }
           } else if (effect.target === "area") {
-            this.damageAreaTargets(target, effect.value + caster.magicPower, newGameState);
+            const killedMonsters = this.damageAreaTargets(target, effect.value + caster.magicPower, newGameState);
+            (newGameState as any).killedMonsters = killedMonsters;
           } else if (effect.target === "all_enemies") {
+            const killedMonsters: string[] = [];
             newGameState.monsters.forEach((monster) => {
               const damage = Math.max(1, effect.value + caster.magicPower - monster.defense);
               monster.hp -= damage;
               newGameState.messages.push(`${monster.name}に${damage}ダメージ！`);
+              if (monster.hp <= 0) {
+                killedMonsters.push(monster.name);
+              }
             });
             newGameState.monsters = newGameState.monsters.filter((monster) => {
               if (monster.hp <= 0) {
@@ -276,6 +282,8 @@ export class SpellSystem {
               }
               return true;
             });
+            // Store killed monsters for quest updates in GameEngine
+            (newGameState as any).killedMonsters = killedMonsters;
           }
           break;
 
@@ -307,8 +315,10 @@ export class SpellSystem {
     );
   }
 
-  private damageAreaTargets(center: Position, damage: number, gameState: GameState): void {
+  private damageAreaTargets(center: Position, damage: number, gameState: GameState): string[] {
     const radius = 2;
+    const killedMonsters: string[] = [];
+    
     gameState.monsters.forEach((monster) => {
       const distance =
         Math.abs(monster.position.x - center.x) + Math.abs(monster.position.y - center.y);
@@ -316,6 +326,9 @@ export class SpellSystem {
         const actualDamage = Math.max(1, damage - monster.defense);
         monster.hp -= actualDamage;
         gameState.messages.push(`${monster.name}に${actualDamage}ダメージ！`);
+        if (monster.hp <= 0) {
+          killedMonsters.push(monster.name);
+        }
       }
     });
 
@@ -326,6 +339,8 @@ export class SpellSystem {
       }
       return true;
     });
+    
+    return killedMonsters;
   }
 
   private killMonster(monster: Monster, gameState: GameState): void {

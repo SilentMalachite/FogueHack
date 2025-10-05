@@ -143,15 +143,15 @@ export class QuestSystem {
         type: "craft",
         status: "available",
         objectives: [
-          {
-            id: "craft_steel_sword",
-            description: "鋼鉄の剣を合成する",
-            type: "craft_item",
-            target: "steel_sword",
-            current: 0,
-            required: 1,
-            completed: false,
-          },
+        {
+          id: "craft_steel_sword",
+          description: "鉄の剣を合成する",
+          type: "craft_item",
+          target: "iron_sword",
+          current: 0,
+          required: 1,
+          completed: false,
+        },
         ],
         rewards: [
           { type: "exp", value: 100 },
@@ -168,15 +168,15 @@ export class QuestSystem {
         type: "kill",
         status: "available",
         objectives: [
-          {
-            id: "kill_orcs",
-            description: "オークを倒す",
-            type: "kill_monster",
-            target: "オーク",
-            current: 0,
-            required: 10,
-            completed: false,
-          },
+        {
+          id: "kill_orcs",
+          description: "オークを倒す",
+          type: "kill_monster",
+          target: "orc",
+          current: 0,
+          required: 10,
+          completed: false,
+        },
         ],
         rewards: [
           { type: "exp", value: 200 },
@@ -217,15 +217,15 @@ export class QuestSystem {
         type: "kill",
         status: "available",
         objectives: [
-          {
-            id: "kill_dragon",
-            description: "ドラゴンを倒す",
-            type: "kill_monster",
-            target: "ドラゴン",
-            current: 0,
-            required: 1,
-            completed: false,
-          },
+        {
+          id: "kill_dragon",
+          description: "ドラゴンを倒す",
+          type: "kill_monster",
+          target: "dragon",
+          current: 0,
+          required: 1,
+          completed: false,
+        },
         ],
         rewards: [
           { type: "exp", value: 500 },

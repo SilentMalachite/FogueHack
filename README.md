@@ -163,13 +163,19 @@ FogueHack/
 │   │   │   ├── questSystem.ts   # クエストシステム
 │   │   │   ├── spellSystem.ts   # 魔法システム
 │   │   │   └── craftingSystem.ts # 合成システム
-│   │   └── pages/         # ページコンポーネント
+│   │   └── test/          # テストファイル
 │   └── public/            # 静的ファイル
 ├── server/                # バックエンド
 │   ├── index.ts          # サーバーエントリポイント
 │   ├── routes.ts         # API ルート
 │   └── storage.ts        # データストレージ
 ├── shared/               # 共有型定義
+├── docs/                 # 📚 ドキュメント
+│   ├── API.md           # API仕様書
+│   ├── ARCHITECTURE.md  # アーキテクチャ設計
+│   ├── GAME_SYSTEMS.md  # ゲームシステム詳細
+│   ├── DEVELOPER_GUIDE.md # 開発者ガイド
+│   └── DEPLOYMENT.md    # デプロイメントガイド
 └── README.md
 ```
 
@@ -205,7 +211,9 @@ http://localhost:5000/test-console.html
 
 ## 🤝 コントリビューション
 
-貢献を歓迎します！以下の手順でご参加ください：
+貢献を歓迎します！詳細は [CONTRIBUTING.md](CONTRIBUTING.md) をご覧ください。
+
+### クイックスタート
 
 1. リポジトリをフォーク
 2. 機能ブランチを作成 (`git checkout -b feature/amazing-feature`)
@@ -213,12 +221,13 @@ http://localhost:5000/test-console.html
 4. ブランチにプッシュ (`git push origin feature/amazing-feature`)
 5. Pull Requestを作成
 
-### コントリビューションガイドライン
+### ドキュメント
 
-- TypeScriptの型安全性を維持
-- 新機能にはテストを追加
-- 日本語のコメントとドキュメントを維持
-- ASCII美学に従ったビジュアルデザイン
+- 📚 [開発者ガイド](docs/DEVELOPER_GUIDE.md) - 開発環境、コーディング規約
+- 🏗️ [アーキテクチャ](docs/ARCHITECTURE.md) - システム設計、データフロー
+- 🎮 [ゲームシステム](docs/GAME_SYSTEMS.md) - ゲームロジック詳細
+- 🌐 [API仕様書](docs/API.md) - バックエンドAPI
+- 🚀 [デプロイガイド](docs/DEPLOYMENT.md) - 本番環境構築
 
 ## 📝 開発ロードマップ
 

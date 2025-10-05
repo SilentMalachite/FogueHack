@@ -119,7 +119,7 @@ app.use((req, res, next) => {
   const port = Number(process.env.PORT) || 5000;
   const listenOptions: { port: number; host: string; reusePort?: boolean } = {
     port,
-    host: "0.0.0.0",
+    host: "localhost",
   };
   // SO_REUSEPORT is not supported on Windows; avoid ENOTSUP
   if (process.platform !== "win32") {

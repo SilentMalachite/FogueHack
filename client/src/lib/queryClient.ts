@@ -23,7 +23,10 @@ export async function apiRequest(
   return res;
 }
 
-type UnauthorizedBehavior = "returnNull" | "throw";
+export enum UnauthorizedBehavior {
+  ReturnNull = "returnNull",
+  Throw = "throw"
+}
 export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
@@ -31,7 +34,7 @@ export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryF
       credentials: "include",
     });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+    if (unauthorizedBehavior === UnauthorizedBehavior.ReturnNull && res.status === 401) {
       return null;
     }
 
@@ -42,7 +45,7 @@ export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryF
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
+      queryFn: getQueryFn({ on401: UnauthorizedBehavior.Throw }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,

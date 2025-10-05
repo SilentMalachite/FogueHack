@@ -108,7 +108,7 @@ export interface GameState {
   player: Player;
   monsters: Monster[];
   items: Map<string, Item>;
-  itemPositions: Map<string, Position>;
+  itemPositions: Map<string, string>; // positionKey -> itemId
   dungeonLevel: number;
   turnCount: number;
   messages: string[];

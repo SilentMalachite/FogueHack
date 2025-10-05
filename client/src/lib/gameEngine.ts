@@ -1,10 +1,9 @@
-import { GameState, Player, Monster, Item, Position, Direction, Spell } from "./gameTypes";
+import { GameState, Player, PlayerState, Monster, Item, Position, Direction, Spell, GamePhase, InventoryState } from "./gameTypes";
 import { DungeonGenerator } from "./dungeonGenerator";
 import { SpellSystem } from "./spellSystem";
 import { CraftingSystem } from "./craftingSystem";
 import { QuestSystem } from "./questSystem";
 import { messages } from "./japanese";
-
 export class GameEngine {
   private gameState: GameState;
   private dungeonGenerator: DungeonGenerator;
@@ -20,11 +19,19 @@ export class GameEngine {
     this.gameState = this.initializeGame();
   }
 
+  // Helper method to convert PlayerState to Player for compatibility with systems
+  private playerStateToPlayer(playerState: PlayerState): Player {
+    return {
+      ...playerState,
+      inventory: playerState.inventory.items,
+    };
+  }
+
   private initializeGame(): GameState {
     const dungeon = this.dungeonGenerator.generateDungeon();
     const playerPosition = this.dungeonGenerator.getRandomFloorPosition(dungeon);
 
-    const player: Player = {
+    const player: PlayerState = {
       position: playerPosition,
       hp: 100,
       maxHp: 100,
@@ -35,7 +42,7 @@ export class GameEngine {
       expToNext: 100,
       attack: 10,
       defense: 5,
-      inventory: [],
+      inventory: { items: [], equipped: {}, craftingMaterials: new Map() },
       equipment: {},
       gold: 0,
       knownSpells: ["heal", "fireball", "magic_missile"], // 初期魔法
@@ -44,7 +51,7 @@ export class GameEngine {
     };
 
     return {
-      phase: "menu",
+      phase: { current: "menu", last: "menu" },
       dungeon,
       player,
       monsters: [],
@@ -59,7 +66,7 @@ export class GameEngine {
 
   startNewGame(): GameState {
     this.gameState = this.initializeGame();
-    this.gameState.phase = "playing";
+    this.gameState.phase = { current: "playing", last: "menu" };
     this.generateMonstersAndItems();
     return { ...this.gameState };
   }
@@ -86,7 +93,7 @@ export class GameEngine {
         const item = this.createRandomItem();
         const positionKey = `${position.x},${position.y}`;
         this.gameState.items.set(item.id, item);
-        this.gameState.itemPositions.set(positionKey, position);
+        this.gameState.itemPositions.set(positionKey, item.id);
       } else {
         console.warn(`Could not find empty position for item ${i + 1}/${itemCount}`);
       }
@@ -113,9 +120,8 @@ export class GameEngine {
       );
 
       // アイテムの位置でないかチェック
-      const itemExists = Array.from(this.gameState.itemPositions.values()).some(
-        (itemPos) => itemPos.x === position.x && itemPos.y === position.y,
-      );
+      const positionKey = `${position.x},${position.y}`;
+      const itemExists = this.gameState.itemPositions.has(positionKey);
 
       if (!monsterExists && !itemExists) {
         return position;
@@ -241,12 +247,15 @@ export class GameEngine {
       symbol: type.symbol,
       color: type.color,
       value: type.value,
-      effects: type.effects as Array<{ type: "heal" | "attack" | "defense" | "mana" | "speed" | "luck" | "magic_power"; value: number }>,
+      effects: type.effects as Array<{
+        type: "heal" | "attack" | "defense" | "mana" | "speed" | "luck" | "magic_power";
+        value: number;
+      }>,
     };
   }
 
   movePlayer(direction: Direction): GameState {
-    if (this.gameState.phase !== "playing") return { ...this.gameState };
+    if (this.gameState.phase.current !== "playing") return { ...this.gameState };
 
     const newPosition = this.getNewPosition(this.gameState.player.position, direction);
 
@@ -326,38 +335,21 @@ export class GameEngine {
   }
 
   private pickupItem(positionKey: string): void {
-    const position = this.gameState.itemPositions.get(positionKey);
-    if (!position) return;
+    const itemId = this.gameState.itemPositions.get(positionKey);
+    if (!itemId) return;
 
-    // アイテムを見つける
-    let itemToPickup: Item | null = null;
-    let itemIdToDelete: string | null = null;
+    const item = this.gameState.items.get(itemId);
+    if (!item) return;
 
-    for (const [itemId, item] of Array.from(this.gameState.items.entries())) {
-      const itemPos = Array.from(this.gameState.itemPositions.entries()).find(
-        ([key, pos]) => pos.x === position.x && pos.y === position.y,
+    if (this.gameState.player.inventory.items.length < 20) {
+      this.gameState.player.inventory.items.push(item);
+      this.addMessage(
+        messages.youPickUp(messages.items[item.name as keyof typeof messages.items] || item.name),
       );
-      if (itemPos) {
-        itemToPickup = item;
-        itemIdToDelete = itemId;
-        break;
-      }
-    }
-
-    if (itemToPickup && itemIdToDelete) {
-      this.gameState.items.delete(itemIdToDelete);
-
-      if (this.gameState.player.inventory.length < 20) {
-        this.gameState.player.inventory.push(itemToPickup);
-        this.addMessage(
-          messages.youPickUp(
-            messages.items[itemToPickup.name as keyof typeof messages.items] || itemToPickup.name,
-          ),
-        );
-        this.gameState.itemPositions.delete(positionKey);
-      } else {
-        this.addMessage(messages.inventoryFull);
-      }
+      this.gameState.items.delete(itemId);
+      this.gameState.itemPositions.delete(positionKey);
+    } else {
+      this.addMessage(messages.inventoryFull);
     }
   }
 
@@ -397,7 +389,7 @@ export class GameEngine {
       // モンスター撃破時に素材ドロップチェック
       const droppedMaterial = this.craftingSystem.calculateMaterialDrop(monster.level || 1);
       if (droppedMaterial) {
-        this.gameState.player.inventory.push({
+        this.gameState.player.inventory.items.push({
           ...droppedMaterial,
           id: `${droppedMaterial.id}_${Date.now()}`,
         });
@@ -428,7 +420,7 @@ export class GameEngine {
     this.addMessage(messages.monsterAttacks(monsterName, actualMonsterDamage));
 
     if (this.gameState.player.hp <= 0) {
-      this.gameState.phase = "dead";
+      this.gameState.phase = { current: "dead", last: this.gameState.phase.current };
       this.gameState.gameOver = true;
       this.addMessage(messages.youDied);
     }
@@ -459,7 +451,9 @@ export class GameEngine {
     const availableSpells = this.spellSystem.getAvailableSpells(this.gameState.player.level);
     availableSpells.forEach((spell) => {
       if (!this.gameState.player.knownSpells.includes(spell.id)) {
-        if (this.spellSystem.learnSpell(this.gameState.player, spell.id)) {
+        const playerAsPlayer = this.playerStateToPlayer(this.gameState.player);
+        if (this.spellSystem.learnSpell(playerAsPlayer, spell.id)) {
+          this.gameState.player.knownSpells.push(spell.id);
           this.addMessage(`新しい魔法「${spell.name}」を習得した！`);
         }
       }
@@ -510,7 +504,7 @@ export class GameEngine {
           this.addMessage(messages.monsterAttacks(monsterName, damage));
 
           if (this.gameState.player.hp <= 0) {
-            this.gameState.phase = "dead";
+            this.gameState.phase = { current: "dead", last: this.gameState.phase.current };
             this.gameState.gameOver = true;
             this.addMessage(messages.youDied);
           }
@@ -526,81 +520,24 @@ export class GameEngine {
   }
 
   castHeal(): GameState {
-    if (this.gameState.phase !== "playing") return { ...this.gameState };
-
-    const manaCost = 10;
-    if (this.gameState.player.mp < manaCost) {
-      this.addMessage(messages.notEnoughMp);
-      return { ...this.gameState };
-    }
-
-    const healAmount = 30;
-    this.gameState.player.mp -= manaCost;
-    this.gameState.player.hp = Math.min(
-      this.gameState.player.maxHp,
-      this.gameState.player.hp + healAmount,
-    );
-
-    this.addMessage(messages.youCastHeal(healAmount));
-    this.processTurn();
-
-    return { ...this.gameState };
+    return this.castSpell("heal");
   }
 
   castFireball(): GameState {
-    if (this.gameState.phase !== "playing") return { ...this.gameState };
-
-    const manaCost = 15;
-    if (this.gameState.player.mp < manaCost) {
-      this.addMessage(messages.notEnoughMp);
-      return { ...this.gameState };
-    }
-
-    this.gameState.player.mp -= manaCost;
-    const damage = 25 + Math.floor(Math.random() * 10);
-
-    // 周囲のモンスターにダメージ
-    const playerPos = this.gameState.player.position;
-    const affectedMonsters = this.gameState.monsters.filter((monster) => {
-      const dx = Math.abs(monster.position.x - playerPos.x);
-      const dy = Math.abs(monster.position.y - playerPos.y);
-      return dx <= 2 && dy <= 2;
-    });
-
-    affectedMonsters.forEach((monster) => {
-      monster.hp -= damage;
-      const monsterName =
-        messages.monsters[monster.name as keyof typeof messages.monsters] || monster.name;
-
-      if (monster.hp <= 0) {
-        this.addMessage(messages.youDefeat(monsterName));
-        this.addMessage(messages.youGainExp(monster.exp));
-        this.addMessage(messages.youGainGold(monster.gold));
-        this.gameState.player.exp += monster.exp;
-        this.gameState.player.gold += monster.gold;
-      }
-    });
-
-    // 死んだモンスターを除去
-    this.gameState.monsters = this.gameState.monsters.filter((m) => m.hp > 0);
-
-    this.addMessage(messages.youCastFireball(damage));
-    this.processTurn();
-
-    return { ...this.gameState };
+    return this.castSpell("fireball");
   }
 
   toggleInventory(): GameState {
-    if (this.gameState.phase === "playing") {
-      this.gameState.phase = "inventory";
-    } else if (this.gameState.phase === "inventory") {
-      this.gameState.phase = "playing";
+    if (this.gameState.phase.current === "playing") {
+      this.gameState.phase = { current: "inventory", last: "playing" };
+    } else if (this.gameState.phase.current === "inventory") {
+      this.gameState.phase = { current: "playing", last: "inventory" };
     }
     return { ...this.gameState };
   }
 
   useItem(itemId: string): GameState {
-    const item = this.gameState.player.inventory.find((i) => i.id === itemId);
+    const item = this.gameState.player.inventory.items.find((i) => i.id === itemId);
     if (!item) return { ...this.gameState };
 
     if (item.type === "potion") {
@@ -619,7 +556,7 @@ export class GameEngine {
       });
 
       // アイテム消費
-      this.gameState.player.inventory = this.gameState.player.inventory.filter(
+      this.gameState.player.inventory.items = this.gameState.player.inventory.items.filter(
         (i) => i.id !== itemId,
       );
       const itemName = messages.items[item.name as keyof typeof messages.items] || item.name;
@@ -630,15 +567,15 @@ export class GameEngine {
   }
 
   equipItem(itemId: string): GameState {
-    const item = this.gameState.player.inventory.find((i) => i.id === itemId);
+    const item = this.gameState.player.inventory.items.find((i) => i.id === itemId);
     if (!item) return { ...this.gameState };
 
     if (item.type === "weapon") {
       if (this.gameState.player.equipment.weapon) {
-        this.gameState.player.inventory.push(this.gameState.player.equipment.weapon);
+        this.gameState.player.inventory.items.push(this.gameState.player.equipment.weapon);
       }
       this.gameState.player.equipment.weapon = item;
-      this.gameState.player.inventory = this.gameState.player.inventory.filter(
+      this.gameState.player.inventory.items = this.gameState.player.inventory.items.filter(
         (i) => i.id !== itemId,
       );
 
@@ -646,10 +583,10 @@ export class GameEngine {
       this.addMessage(messages.youEquip(itemName));
     } else if (item.type === "armor") {
       if (this.gameState.player.equipment.armor) {
-        this.gameState.player.inventory.push(this.gameState.player.equipment.armor);
+        this.gameState.player.inventory.items.push(this.gameState.player.equipment.armor);
       }
       this.gameState.player.equipment.armor = item;
-      this.gameState.player.inventory = this.gameState.player.inventory.filter(
+      this.gameState.player.inventory.items = this.gameState.player.inventory.items.filter(
         (i) => i.id !== itemId,
       );
 
@@ -667,6 +604,13 @@ export class GameEngine {
         ...this.gameState,
         items: Array.from(this.gameState.items.entries()),
         itemPositions: Array.from(this.gameState.itemPositions.entries()),
+        player: {
+          ...this.gameState.player,
+          inventory: {
+            ...this.gameState.player.inventory,
+            craftingMaterials: Array.from(this.gameState.player.inventory.craftingMaterials.entries()),
+          },
+        },
         questData: this.questSystem.getQuestData(),
       }),
     );
@@ -688,6 +632,13 @@ export class GameEngine {
         ...parsed,
         items: new Map(parsed.items || []),
         itemPositions: new Map(parsed.itemPositions || []),
+        player: {
+          ...parsed.player,
+          inventory: {
+            ...parsed.player.inventory,
+            craftingMaterials: new Map(parsed.player.inventory.craftingMaterials || []),
+          },
+        },
       };
       return { ...this.gameState };
     } catch (error) {
@@ -748,9 +699,10 @@ export class GameEngine {
   // 魔法詠唱メソッド
   castSpell(spellId: string, targetPosition?: Position): GameState {
     const target = targetPosition || this.gameState.player.position;
+    const playerAsPlayer = this.playerStateToPlayer(this.gameState.player);
     const result = this.spellSystem.castSpell(
       spellId,
-      this.gameState.player,
+      playerAsPlayer,
       target,
       this.gameState,
     );
@@ -761,6 +713,16 @@ export class GameEngine {
       // 魔法使用クエスト進行更新
       const spellMessages = this.questSystem.updateQuestProgress("spell_used", spellId);
       spellMessages.forEach((msg) => this.addMessage(msg));
+
+      // 魔法で倒したモンスターのクエスト進行更新
+      const killedMonsters = (this.gameState as any).killedMonsters;
+      if (killedMonsters && Array.isArray(killedMonsters)) {
+        killedMonsters.forEach((monsterName: string) => {
+          const killMessages = this.questSystem.updateQuestProgress("monster_killed", monsterName);
+          killMessages.forEach((msg) => this.addMessage(msg));
+        });
+        delete (this.gameState as any).killedMonsters;
+      }
     }
 
     this.addMessage(result.message);
@@ -770,7 +732,8 @@ export class GameEngine {
 
   // アイテム合成メソッド
   craftItem(recipeId: string): GameState {
-    const result = this.craftingSystem.craft(recipeId, this.gameState.player);
+    const playerAsPlayer = this.playerStateToPlayer(this.gameState.player);
+    const result = this.craftingSystem.craft(recipeId, playerAsPlayer);
     this.addMessage(result.message);
 
     if (result.success && result.item) {
@@ -796,7 +759,8 @@ export class GameEngine {
 
   // 合成可能性チェック
   canCraftItem(recipeId: string): { canCraft: boolean; missing: string[] } {
-    return this.craftingSystem.canCraft(recipeId, this.gameState.player);
+    const playerAsPlayer = this.playerStateToPlayer(this.gameState.player);
+    return this.craftingSystem.canCraft(recipeId, playerAsPlayer);
   }
 
   // クエストシステムメソッド
@@ -832,7 +796,8 @@ export class GameEngine {
     const quest = this.questSystem.getQuest(questId);
     if (!quest || quest.status !== "completed") return;
 
-    const rewardMessages = this.questSystem.giveQuestRewards(questId, this.gameState.player);
+    const playerAsPlayer = this.playerStateToPlayer(this.gameState.player);
+    const rewardMessages = this.questSystem.giveQuestRewards(questId, playerAsPlayer);
     rewardMessages.forEach((msg) => this.addMessage(msg));
 
     // アイテム報酬の処理
@@ -841,7 +806,7 @@ export class GameEngine {
         const material = this.craftingSystem.getMaterial(reward.itemId);
         if (material) {
           for (let i = 0; i < reward.value; i++) {
-            this.gameState.player.inventory.push({
+            this.gameState.player.inventory.items.push({
               ...material,
               id: `${material.id}_${Date.now()}_${i}`,
             });

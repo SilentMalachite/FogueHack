@@ -20,6 +20,7 @@ Production: https://your-domain.com/api
 サーバーの稼働状況を確認します。
 
 **Response:**
+
 ```json
 {
   "ok": true
@@ -27,6 +28,7 @@ Production: https://your-domain.com/api
 ```
 
 **Status Codes:**
+
 - `200` - サーバー正常稼働
 
 ---
@@ -38,6 +40,7 @@ Production: https://your-domain.com/api
 新しいユーザーを作成します。
 
 **Request Body:**
+
 ```json
 {
   "username": "string",
@@ -46,6 +49,7 @@ Production: https://your-domain.com/api
 ```
 
 **Response:**
+
 ```json
 {
   "id": 1,
@@ -54,6 +58,7 @@ Production: https://your-domain.com/api
 ```
 
 **Status Codes:**
+
 - `201` - ユーザー作成成功
 - `400` - 無効なリクエストデータ
 - `409` - ユーザー名が既に存在
@@ -63,9 +68,11 @@ Production: https://your-domain.com/api
 ユーザーIDでユーザー情報を取得します。
 
 **Parameters:**
+
 - `id` (integer) - ユーザーID
 
 **Response:**
+
 ```json
 {
   "id": 1,
@@ -74,6 +81,7 @@ Production: https://your-domain.com/api
 ```
 
 **Status Codes:**
+
 - `200` - 取得成功
 - `400` - 無効なID
 - `404` - ユーザーが見つからない
@@ -83,9 +91,11 @@ Production: https://your-domain.com/api
 ユーザー名でユーザー情報を取得します。
 
 **Parameters:**
+
 - `username` (string) - ユーザー名
 
 **Response:**
+
 ```json
 {
   "id": 1,
@@ -94,6 +104,7 @@ Production: https://your-domain.com/api
 ```
 
 **Status Codes:**
+
 - `200` - 取得成功
 - `404` - ユーザーが見つからない
 

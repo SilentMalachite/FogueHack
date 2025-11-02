@@ -141,7 +141,7 @@ export interface PlayerState {
 
 export interface InventoryState {
   items: Item[];
-  equipped: { weapon?: string; armor?: string; };
+  equipped: { weapon?: string; armor?: string };
   craftingMaterials: Map<string, number>; // materialId -> quantity
 }
 
@@ -163,5 +163,5 @@ export enum Direction {
   Northeast = "northeast",
   Northwest = "northwest",
   Southeast = "southeast",
-  Southwest = "southwest"
+  Southwest = "southwest",
 }

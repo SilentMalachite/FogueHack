@@ -25,7 +25,7 @@ export async function apiRequest(
 
 export enum UnauthorizedBehavior {
   ReturnNull = "returnNull",
-  Throw = "throw"
+  Throw = "throw",
 }
 export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>

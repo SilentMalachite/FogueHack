@@ -22,4 +22,3 @@ export const AudioPermission: React.FC = () => {
 };
 
 export default AudioPermission;
-

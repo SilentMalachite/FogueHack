@@ -20,6 +20,7 @@ GameEngine (中核)
 ## 🎯 GameEngine (ゲームエンジン)
 
 ### 概要
+
 `client/src/lib/gameEngine.ts`
 
 ゲームの中核となるクラス。全てのシステムを統合し、ゲームループを管理します。
@@ -27,20 +28,26 @@ GameEngine (中核)
 ### 主要メソッド
 
 #### `startNewGame(): GameState`
+
 新しいゲームを開始します。
+
 - ダンジョン生成
 - プレイヤー初期化
 - モンスター・アイテム配置
 
 #### `movePlayer(direction: Direction): GameState`
+
 プレイヤーの移動を処理します。
+
 - 境界・壁チェック
 - モンスターとの戦闘
 - アイテム取得
 - 階段による階層移動
 
 #### `combat(monster: Monster): void`
+
 戦闘システムの実装。
+
 - ダメージ計算：`max(1, 攻撃力 - 防御力 + ランダム要素)`
 - 経験値・ゴールド獲得
 - レベルアップ判定
@@ -51,6 +58,7 @@ GameEngine (中核)
 ## 🏰 DungeonGenerator (ダンジョン生成)
 
 ### 概要
+
 `client/src/lib/dungeonGenerator.ts`
 
 手続き的にダンジョンを生成するシステム。
@@ -75,20 +83,21 @@ GameEngine (中核)
 
 ### 部屋タイプ詳細
 
-| タイプ | 説明 | 特殊要素 |
-|--------|------|----------|
-| normal | 通常の部屋 | なし |
-| treasure | 宝物庫 | 中央に宝箱 |
-| boss | ボス部屋 | 四隅に柱、階段配置優先 |
-| library | 図書館 | 壁際に本棚（柱） |
-| prison | 牢獄 | 格子状の柱 |
-| shrine | 神殿 | 中央に祭壇 |
+| タイプ   | 説明       | 特殊要素               |
+| -------- | ---------- | ---------------------- |
+| normal   | 通常の部屋 | なし                   |
+| treasure | 宝物庫     | 中央に宝箱             |
+| boss     | ボス部屋   | 四隅に柱、階段配置優先 |
+| library  | 図書館     | 壁際に本棚（柱）       |
+| prison   | 牢獄       | 格子状の柱             |
+| shrine   | 神殿       | 中央に祭壇             |
 
 ---
 
 ## 🔮 SpellSystem (魔法システム)
 
 ### 概要
+
 `client/src/lib/spellSystem.ts`
 
 魔法の定義、習得、詠唱を管理するシステム。
@@ -96,17 +105,20 @@ GameEngine (中核)
 ### 魔法カテゴリ
 
 #### 初級魔法 (レベル1-3)
+
 - **ヒール**: HP回復
 - **ファイアボール**: 範囲攻撃魔法
 - **マジックミサイル**: 必中単体攻撃
 
 #### 中級魔法 (レベル4-6)
+
 - **アイスランス**: 凍結効果付き攻撃
 - **ライトニングボルト**: 貫通攻撃
 - **グレーターヒール**: 強力な回復+毒治癒
 - **マジックシールド**: 防御力向上バフ
 
 #### 上級魔法 (レベル7-10)
+
 - **メテオ**: 範囲大ダメージ
 - **テレポート**: 瞬間移動
 - **タイムストップ**: 敵行動停止
@@ -142,6 +154,7 @@ castSpell(spellId: string, target?: Position): {
 ## 🔨 CraftingSystem (合成システム)
 
 ### 概要
+
 `client/src/lib/craftingSystem.ts`
 
 素材を組み合わせてアイテムを作成するシステム。
@@ -149,6 +162,7 @@ castSpell(spellId: string, target?: Position): {
 ### 素材カテゴリ
 
 #### 基本素材
+
 - **鉄鉱石** (common): 武器作りの基本
 - **ミスリル鉱石** (rare): 高級武器用
 - **ドラゴンの鱗** (epic): 最高級防具用
@@ -156,6 +170,7 @@ castSpell(spellId: string, target?: Position): {
 - **薬草** (common): ポーション基本材料
 
 #### 宝石
+
 - **ルビー**: 攻撃力強化
 - **サファイア**: 魔法力強化
 - **エメラルド**: 防御力強化
@@ -193,6 +208,7 @@ interface CraftingRecipe {
 ## 📋 QuestSystem (クエストシステム)
 
 ### 概要
+
 `client/src/lib/questSystem.ts`
 
 クエストの管理、進行追跡、報酬付与を行うシステム。
@@ -200,20 +216,25 @@ interface CraftingRecipe {
 ### クエストタイプ
 
 #### 討伐クエスト (kill)
+
 - 指定モンスターの撃破
 - 目標: 「任意のモンスター3体」「オーク10体」など
 
 #### 収集クエスト (collect)
+
 - アイテム・素材の収集
 - 魔法使用回数も含む
 
 #### 探索クエスト (explore)
+
 - 指定階層への到達
 
 #### 合成クエスト (craft)
+
 - 指定アイテムの合成
 
 #### 配達クエスト (deliver)
+
 - 将来実装予定
 
 ### クエスト状態管理
@@ -229,6 +250,7 @@ updateQuestProgress(eventType: string, target: string, amount: number = 1)
 ```
 
 **イベントタイプ:**
+
 - `monster_killed`: モンスター撃破
 - `item_collected`: アイテム取得
 - `floor_reached`: 階層到達
@@ -251,6 +273,7 @@ interface QuestReward {
 ## 🎵 AudioSystem (音響システム)
 
 ### 概要
+
 `client/src/lib/stores/useAudio.tsx`
 
 ゲーム内の音響効果を管理するシステム。
@@ -274,6 +297,7 @@ const [needsUserInteraction, setNeedsUserInteraction] = useState(true);
 ## 💾 SaveSystem (セーブシステム)
 
 ### 概要
+
 `localStorage`を使用したクライアントサイドセーブシステム。
 
 ### セーブデータ構造
@@ -336,11 +360,11 @@ const craftMessages = this.questSystem.updateQuestProgress("item_crafted", resul
 // useGameState.tsx
 export const useGameState = create<GameStore>((set, get) => {
   const gameEngine = new GameEngine();
-  
+
   return {
     ...initialState,
     gameEngine,
-    
+
     // すべてのアクションは GameEngine を通る
     movePlayer: (direction) => {
       const newState = get().gameEngine.movePlayer(direction);
@@ -377,17 +401,20 @@ export const useGameState = create<GameStore>((set, get) => {
 ## 🔧 拡張ポイント
 
 ### 新システム追加
+
 1. `client/src/lib/` に新システムクラス作成
 2. `GameEngine` で初期化・統合
 3. `useGameState` にアクション追加
 4. UI コンポーネント作成
 
 ### 新クエストタイプ
+
 1. `QuestSystem` に新 `ObjectiveType` 追加
 2. `updateQuestProgress` にイベント処理追加
 3. 該当システムでイベント発火
 
 ### 新魔法追加
+
 1. `SpellSystem` の `initializeSpells` に定義追加
 2. `applySpellEffects` に効果処理追加
 3. 必要に応じて新エフェクトタイプ定義

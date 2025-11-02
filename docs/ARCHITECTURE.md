@@ -134,7 +134,7 @@ class GameEngine {
   private spellSystem: SpellSystem;
   private craftingSystem: CraftingSystem;
   private questSystem: QuestSystem;
-  
+
   // ゲームループ
   startNewGame(): GameState;
   movePlayer(direction: Direction): GameState;
@@ -149,12 +149,12 @@ class GameEngine {
 // Zustand Store パターン
 export const useGameState = create<GameStore>((set, get) => {
   const gameEngine = new GameEngine();
-  
+
   return {
     // State
     ...initialState,
     gameEngine,
-    
+
     // Actions
     movePlayer: (direction) => {
       const newState = get().gameEngine.movePlayer(direction);
@@ -172,16 +172,16 @@ class GameEngine {
   castSpell(spellId: string): GameState {
     // 1. 魔法システムで処理
     const result = this.spellSystem.castSpell(spellId, ...);
-    
+
     // 2. クエストシステムに通知
     const questMessages = this.questSystem.updateQuestProgress(
       "spell_used", spellId
     );
-    
+
     // 3. 状態統合
     this.gameState = result.gameState;
     questMessages.forEach(msg => this.addMessage(msg));
-    
+
     return this.gameState;
   }
 }
@@ -229,16 +229,20 @@ class MemStorage implements IStorage {
 app.use(helmet());
 
 // CORS - オリジン制限
-app.use(cors({
-  origin: true,
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  }),
+);
 
 // Rate Limiting
-app.use(rateLimit({
-  windowMs: 60 * 1000,
-  max: 100,
-}));
+app.use(
+  rateLimit({
+    windowMs: 60 * 1000,
+    max: 100,
+  }),
+);
 
 // Sensitive Data Masking
 function maskSensitive(value: any): any {
@@ -271,7 +275,7 @@ const GameUI = () => {
 const Game = () => {
   // 状態管理とイベントハンドリング
   const gameState = useGameState();
-  
+
   return (
     <div>
       <GameMap dungeon={gameState.dungeon} />
@@ -378,9 +382,12 @@ const visibleTiles = useMemo(() => {
 }, [player.position, dungeon]);
 
 // useCallback for stable references
-const handleMove = useCallback((direction) => {
-  movePlayer(direction);
-}, [movePlayer]);
+const handleMove = useCallback(
+  (direction) => {
+    movePlayer(direction);
+  },
+  [movePlayer],
+);
 ```
 
 ### ゲームループ最適化
@@ -469,7 +476,7 @@ export default defineConfig({
 
 2. マイクロサービス化
    ├── User Service
-   ├── Game Service  
+   ├── Game Service
    ├── Chat Service
    └── Leaderboard Service
 

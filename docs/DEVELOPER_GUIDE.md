@@ -65,13 +65,13 @@ FogueHack/
 
 ### ファイルの役割
 
-| ファイル | 役割 | 編集頻度 |
-|----------|------|----------|
-| `gameEngine.ts` | ゲームの中核ロジック | ⭐⭐⭐ |
-| `gameTypes.ts` | 型定義 | ⭐⭐⭐ |
-| `components/Game.tsx` | メインUI | ⭐⭐ |
-| `useGameState.tsx` | 状態管理 | ⭐⭐ |
-| `server/routes.ts` | API | ⭐ |
+| ファイル              | 役割                 | 編集頻度 |
+| --------------------- | -------------------- | -------- |
+| `gameEngine.ts`       | ゲームの中核ロジック | ⭐⭐⭐   |
+| `gameTypes.ts`        | 型定義               | ⭐⭐⭐   |
+| `components/Game.tsx` | メインUI             | ⭐⭐     |
+| `useGameState.tsx`    | 状態管理             | ⭐⭐     |
+| `server/routes.ts`    | API                  | ⭐       |
 
 ## 🛠️ 開発ワークフロー
 
@@ -182,11 +182,11 @@ export const messages = {
 // client/src/lib/gameTypes.ts
 type QuestType = "kill" | "collect" | "explore" | "craft" | "deliver" | "escort"; // escort を追加
 
-type ObjectiveType = 
-  | "kill_monster" 
-  | "collect_item" 
-  | "reach_floor" 
-  | "craft_item" 
+type ObjectiveType =
+  | "kill_monster"
+  | "collect_item"
+  | "reach_floor"
+  | "craft_item"
   | "use_spell"
   | "escort_npc"; // 新しい目標タイプ
 ```
@@ -217,15 +217,7 @@ const escortMessages = this.questSystem.updateQuestProgress("npc_escorted", npcI
 
 ```typescript
 // client/src/lib/gameTypes.ts
-type ItemType = 
-  | "weapon" 
-  | "armor" 
-  | "potion" 
-  | "scroll" 
-  | "misc" 
-  | "material" 
-  | "gem"
-  | "tool"; // 新しいカテゴリ
+type ItemType = "weapon" | "armor" | "potion" | "scroll" | "misc" | "material" | "gem" | "tool"; // 新しいカテゴリ
 ```
 
 2. **アイテム効果を実装**
@@ -266,27 +258,33 @@ const GameEverything = () => {
 
 ```typescript
 // React.memo で再レンダリング防止
-const GameMap = React.memo(({ dungeon, player, monsters }) => {
-  // 重い描画処理
-}, (prevProps, nextProps) => {
-  // カスタム比較関数
-  return (
-    prevProps.dungeon === nextProps.dungeon &&
-    prevProps.player.position === nextProps.player.position
-  );
-});
+const GameMap = React.memo(
+  ({ dungeon, player, monsters }) => {
+    // 重い描画処理
+  },
+  (prevProps, nextProps) => {
+    // カスタム比較関数
+    return (
+      prevProps.dungeon === nextProps.dungeon &&
+      prevProps.player.position === nextProps.player.position
+    );
+  },
+);
 
 // useMemo で計算結果キャッシュ
 const visibleMonsters = useMemo(() => {
-  return monsters.filter(monster => 
-    isVisible(player.position, monster.position)
-  );
+  return monsters.filter((monster) => isVisible(player.position, monster.position));
 }, [monsters, player.position]);
 
 // useCallback で関数参照を安定化
-const handleKeyPress = useCallback((event: KeyboardEvent) => {
-  // キーハンドリング
-}, [/* 依存配列 */]);
+const handleKeyPress = useCallback(
+  (event: KeyboardEvent) => {
+    // キーハンドリング
+  },
+  [
+    /* 依存配列 */
+  ],
+);
 ```
 
 ### カスタムフック作成
@@ -300,7 +298,7 @@ export const useKeyPress = (targetKey: string, callback: () => void) => {
         callback();
       }
     };
-    
+
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [targetKey, callback]);
@@ -309,10 +307,10 @@ export const useKeyPress = (targetKey: string, callback: () => void) => {
 // 使用例
 const Game = () => {
   const { castSpell } = useGameState();
-  
+
   useKeyPress('h', () => castSpell('heal'));
   useKeyPress('f', () => castSpell('fireball'));
-  
+
   return <div>{/* ゲームUI */}</div>;
 };
 ```
@@ -324,7 +322,7 @@ const Game = () => {
 ```css
 /* ASCII 美学のためのスタイル */
 .ascii-text {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 16px;
   line-height: 1.2;
   letter-spacing: 0;
@@ -338,10 +336,18 @@ const Game = () => {
 }
 
 /* NetHack スタイルの色使い */
-.monster-orc { color: #ffff00; }    /* 黄色 */
-.monster-dragon { color: #ff0000; } /* 赤色 */
-.item-weapon { color: #cccccc; }    /* 灰色 */
-.item-potion { color: #ff69b4; }    /* ピンク */
+.monster-orc {
+  color: #ffff00;
+} /* 黄色 */
+.monster-dragon {
+  color: #ff0000;
+} /* 赤色 */
+.item-weapon {
+  color: #cccccc;
+} /* 灰色 */
+.item-potion {
+  color: #ff69b4;
+} /* ピンク */
 ```
 
 ### レスポンシブ対応
@@ -350,7 +356,7 @@ const Game = () => {
 // client/src/hooks/use-is-mobile.tsx を活用
 const GameUI = () => {
   const isMobile = useIsMobile();
-  
+
   return (
     <div className={`game-ui ${
       isMobile ? 'mobile-layout' : 'desktop-layout'
@@ -369,14 +375,14 @@ const GameUI = () => {
 // client/src/test/gameTest.ts
 export function testNewFeature() {
   console.log("=== 新機能テスト開始 ===");
-  
+
   try {
     const gameEngine = new GameEngine();
     gameEngine.startNewGame();
-    
+
     // テストロジック
     const result = gameEngine.someNewMethod();
-    
+
     if (result.success) {
       console.log("✅ 新機能テスト成功");
       return true;
@@ -411,26 +417,26 @@ testNewFeature() // 個別テスト実行
 // test-game.js に追加
 function testCombatSystem() {
   console.log("=== 戦闘システムテスト ===");
-  
+
   const gameEngine = new GameEngine();
   gameEngine.startNewGame();
-  
+
   const initialState = gameEngine.getGameState();
   const initialHp = initialState.player.hp;
-  
+
   // モンスターとの戦闘をシミュレート
   const monster = initialState.monsters[0];
   if (monster) {
     gameEngine.movePlayer(/* モンスターの方向 */);
     const newState = gameEngine.getGameState();
-    
+
     // HP が減少したことを確認
     if (newState.player.hp < initialHp) {
       console.log("✅ 戦闘ダメージ確認");
       return true;
     }
   }
-  
+
   console.log("❌ 戦闘システム異常");
   return false;
 }
@@ -442,7 +448,7 @@ function testCombatSystem() {
 
 ```typescript
 // デバッグ用のグローバル関数を追加
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   (window as any).debugGame = {
     getGameState: () => useGameState.getState(),
     setPlayerHp: (hp: number) => {
@@ -455,7 +461,7 @@ if (typeof window !== 'undefined') {
     teleportPlayer: (x: number, y: number) => {
       const state = useGameState.getState();
       state.player.position = { x, y };
-    }
+    },
   };
 }
 ```
@@ -467,7 +473,7 @@ if (typeof window !== 'undefined') {
 debugGame.getGameState().player.hp; // HP確認
 debugGame.setPlayerHp(1); // HP設定
 debugGame.teleportPlayer(10, 10); // テレポート
-debugGame.addItem('ruby_sword'); // アイテム追加
+debugGame.addItem("ruby_sword"); // アイテム追加
 ```
 
 ### ログ出力の活用
@@ -485,11 +491,11 @@ function debugLog(message: string, data?: any) {
 // 使用例
 castSpell(spellId: string): GameState {
   debugLog('魔法詠唱開始', { spellId, playerMp: this.gameState.player.mp });
-  
+
   const result = this.spellSystem.castSpell(/* ... */);
-  
+
   debugLog('魔法詠唱結果', { success: result.success, message: result.message });
-  
+
   return this.gameState;
 }
 ```
@@ -525,7 +531,7 @@ useEffect(() => {
   const interval = setInterval(() => {
     // 定期処理
   }, 1000);
-  
+
   return () => clearInterval(interval); // ✅ クリーンアップ
 }, []);
 
@@ -534,9 +540,9 @@ useEffect(() => {
   const handler = (event: KeyboardEvent) => {
     // キーハンドリング
   };
-  
-  window.addEventListener('keydown', handler);
-  return () => window.removeEventListener('keydown', handler); // ✅ クリーンアップ
+
+  window.addEventListener("keydown", handler);
+  return () => window.removeEventListener("keydown", handler); // ✅ クリーンアップ
 }, []);
 ```
 
@@ -647,9 +653,9 @@ const memoizedCallback = useCallback(() => {
 // client/src/lib/gameEngine.ts でバランス調整
 
 // ダメージ計算式
-const damage = Math.max(1, 
-  attacker.attack - defender.defense + 
-  Math.floor(Math.random() * 5) // ランダム要素
+const damage = Math.max(
+  1,
+  attacker.attack - defender.defense + Math.floor(Math.random() * 5), // ランダム要素
 );
 
 // 経験値テーブル調整

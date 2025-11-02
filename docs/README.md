@@ -5,58 +5,67 @@ FogueHackプロジェクトの包括的なドキュメントです。目的に�
 ## 🎯 目的別ガイド
 
 ### 🚀 すぐに始めたい
+
 - [README.md](../README.md) - プロジェクト概要とクイックスタート
 - [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) - 開発者向けクイックスタート
 
 ### 🎮 ゲームを理解したい
+
 - [GAME_SYSTEMS.md](./GAME_SYSTEMS.md) - ゲームシステム詳細
 - [README.md](../README.md#🎮-操作方法) - 操作方法
 - [README.md](../README.md#🎨-ゲームデザイン) - ゲームデザイン
 
 ### 👨‍💻 開発に参加したい
+
 - [CONTRIBUTING.md](../CONTRIBUTING.md) - 貢献ガイドライン
 - [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) - 開発者ガイド
 - [ARCHITECTURE.md](./ARCHITECTURE.md) - アーキテクチャ仕様
 
 ### 🌐 APIを使いたい
+
 - [API.md](./API.md) - API仕様書
 - [ARCHITECTURE.md](./ARCHITECTURE.md#🌐-バックエンド設計) - バックエンド設計
 
 ### 🚀 デプロイしたい
+
 - [DEPLOYMENT.md](./DEPLOYMENT.md) - デプロイメントガイド
 - [README.md](../README.md#🔧-環境変数と運用) - 環境設定
 
 ## 📋 ドキュメント一覧
 
-| ドキュメント | 対象者 | 内容 |
-|-------------|--------|------|
-| [README.md](../README.md) | 全員 | プロジェクト概要、機能、クイックスタート |
-| [CONTRIBUTING.md](../CONTRIBUTING.md) | 貢献者 | 貢献ガイドライン、ワークフロー |
-| [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) | 開発者 | 開発環境、コーディング規約、デバッグ |
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | アーキテクト | システム設計、データフロー、設計判断 |
-| [GAME_SYSTEMS.md](./GAME_SYSTEMS.md) | ゲーム開発者 | ゲームロジック、システム間連携 |
-| [API.md](./API.md) | API利用者 | エンドポイント仕様、認証、エラー |
-| [DEPLOYMENT.md](./DEPLOYMENT.md) | インフラ | デプロイ手順、環境設定、監視 |
-| [TODO.md](../TODO.md) | 全員 | 今後のタスク、改善点 |
+| ドキュメント                               | 対象者       | 内容                                     |
+| ------------------------------------------ | ------------ | ---------------------------------------- |
+| [README.md](../README.md)                  | 全員         | プロジェクト概要、機能、クイックスタート |
+| [CONTRIBUTING.md](../CONTRIBUTING.md)      | 貢献者       | 貢献ガイドライン、ワークフロー           |
+| [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) | 開発者       | 開発環境、コーディング規約、デバッグ     |
+| [ARCHITECTURE.md](./ARCHITECTURE.md)       | アーキテクト | システム設計、データフロー、設計判断     |
+| [GAME_SYSTEMS.md](./GAME_SYSTEMS.md)       | ゲーム開発者 | ゲームロジック、システム間連携           |
+| [API.md](./API.md)                         | API利用者    | エンドポイント仕様、認証、エラー         |
+| [DEPLOYMENT.md](./DEPLOYMENT.md)           | インフラ     | デプロイ手順、環境設定、監視             |
+| [TODO.md](../TODO.md)                      | 全員         | 今後のタスク、改善点                     |
 
 ## 🔍 情報を見つける
 
 ### コードを理解したい
+
 1. [ARCHITECTURE.md](./ARCHITECTURE.md) でシステム全体を把握
 2. [GAME_SYSTEMS.md](./GAME_SYSTEMS.md) でゲームロジックを理解
 3. [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) で実装パターンを学習
 
 ### バグを修正したい
+
 1. [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md#🔧-デバッグ技術) でデバッグ方法を確認
 2. [CONTRIBUTING.md](../CONTRIBUTING.md#🔄-貢献のワークフロー) でワークフローを確認
 3. GitHub Issues でバグ報告を確認
 
 ### 新機能を追加したい
+
 1. [GAME_SYSTEMS.md](./GAME_SYSTEMS.md#🔧-拡張ポイント) で拡張ポイントを確認
 2. [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md#🎮-ゲームシステム開発) で実装方法を学習
 3. [CONTRIBUTING.md](../CONTRIBUTING.md) で貢献プロセスを確認
 
 ### デプロイしたい
+
 1. [DEPLOYMENT.md](./DEPLOYMENT.md) でデプロイ手順を確認
 2. [README.md](../README.md#🔧-環境変数と運用) で環境設定を確認
 3. [API.md](./API.md) でAPI仕様を確認

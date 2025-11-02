@@ -263,7 +263,11 @@ export class SpellSystem {
               }
             }
           } else if (effect.target === "area") {
-            const killedMonsters = this.damageAreaTargets(target, effect.value + caster.magicPower, newGameState);
+            const killedMonsters = this.damageAreaTargets(
+              target,
+              effect.value + caster.magicPower,
+              newGameState,
+            );
             (newGameState as any).killedMonsters = killedMonsters;
           } else if (effect.target === "all_enemies") {
             const killedMonsters: string[] = [];
@@ -318,7 +322,7 @@ export class SpellSystem {
   private damageAreaTargets(center: Position, damage: number, gameState: GameState): string[] {
     const radius = 2;
     const killedMonsters: string[] = [];
-    
+
     gameState.monsters.forEach((monster) => {
       const distance =
         Math.abs(monster.position.x - center.x) + Math.abs(monster.position.y - center.y);
@@ -339,7 +343,7 @@ export class SpellSystem {
       }
       return true;
     });
-    
+
     return killedMonsters;
   }
 

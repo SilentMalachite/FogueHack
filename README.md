@@ -78,6 +78,7 @@ npm run dev
 - `DATABASE_URL`: Drizzle/Postgres を使用する際の接続文字列（`.env.example` 参照）。
 
 運用ルール:
+
 - 機密情報は `.env` にのみ記述し、Gitに含めない（`.gitignore` 済み）。
 - 共有時は `.env.example` を更新し、必要なキーを網羅する。
 - 本番ビルドは `npm run build && npm start`（`NODE_ENV=production`）。開発は `npm run dev`。

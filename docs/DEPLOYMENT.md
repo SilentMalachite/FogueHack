@@ -129,23 +129,23 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '18'
-      
+          node-version: "18"
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Type check
         run: npm run check
-      
+
       - name: Lint
         run: npm run lint
-      
+
       - name: Format check
         run: npm run format:check
-      
+
       - name: Build
         run: npm run build
-      
+
       - name: Test
         run: npm test # 将来実装
 
@@ -213,7 +213,7 @@ CMD ["node", "dist/index.js"]
 
 ```yaml
 # docker-compose.yml
-version: '3.8'
+version: "3.8"
 
 services:
   app:
@@ -426,13 +426,13 @@ npm run db:push
 
 ```typescript
 // server/routes.ts
-app.get('/api/health', (req, res) => {
+app.get("/api/health", (req, res) => {
   res.json({
     ok: true,
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     memory: process.memoryUsage(),
-    version: process.env.npm_package_version
+    version: process.env.npm_package_version,
   });
 });
 ```
@@ -443,22 +443,26 @@ app.get('/api/health', (req, res) => {
 // 構造化ログ
 const logger = {
   info: (message: string, meta?: object) => {
-    console.log(JSON.stringify({
-      level: 'info',
-      message,
-      timestamp: new Date().toISOString(),
-      ...meta
-    }));
+    console.log(
+      JSON.stringify({
+        level: "info",
+        message,
+        timestamp: new Date().toISOString(),
+        ...meta,
+      }),
+    );
   },
   error: (message: string, error?: Error, meta?: object) => {
-    console.error(JSON.stringify({
-      level: 'error',
-      message,
-      error: error?.stack,
-      timestamp: new Date().toISOString(),
-      ...meta
-    }));
-  }
+    console.error(
+      JSON.stringify({
+        level: "error",
+        message,
+        error: error?.stack,
+        timestamp: new Date().toISOString(),
+        ...meta,
+      }),
+    );
+  },
 };
 ```
 
@@ -471,7 +475,7 @@ npm install @sentry/node @sentry/tracing
 
 ```typescript
 // server/index.ts
-import * as Sentry from '@sentry/node';
+import * as Sentry from "@sentry/node";
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
@@ -501,16 +505,18 @@ JWT_SECRET=jwt-secret-key
 
 ```typescript
 // server/index.ts で設定済み
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:"],
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", "data:"],
+      },
     },
-  },
-}));
+  }),
+);
 ```
 
 ## 🚨 トラブルシューティング
@@ -584,17 +590,17 @@ node --inspect dist/index.js
 // パフォーマンス監視
 app.use((req, res, next) => {
   const start = Date.now();
-  
-  res.on('finish', () => {
+
+  res.on("finish", () => {
     const duration = Date.now() - start;
-    logger.info('Request completed', {
+    logger.info("Request completed", {
       method: req.method,
       url: req.url,
       status: res.statusCode,
-      duration
+      duration,
     });
   });
-  
+
   next();
 });
 ```

@@ -111,7 +111,13 @@ var vite_config_default = defineConfig({
   root: path.resolve(__dirname, "client"),
   build: {
     outDir: path.resolve(__dirname, "dist/public"),
-    emptyOutDir: true
+    emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, "client", "index.html"),
+        test: path.resolve(__dirname, "client", "test-console.html")
+      }
+    }
   },
   // Add support for large models and audio files
   assetsInclude: ["**/*.gltf", "**/*.glb", "**/*.mp3", "**/*.ogg", "**/*.wav"]
@@ -236,14 +242,7 @@ app.use(
 app.use(express2.json());
 app.use(express2.urlencoded({ extended: false }));
 function maskSensitive(value) {
-  const SENSITIVE_KEYS = /* @__PURE__ */ new Set([
-    "password",
-    "pass",
-    "token",
-    "authorization",
-    "auth",
-    "secret"
-  ]);
+  const SENSITIVE_KEYS = /* @__PURE__ */ new Set(["password", "pass", "token", "authorization", "auth", "secret"]);
   const mask = (v) => {
     if (v == null) return v;
     if (Array.isArray(v)) return v.map(mask);
@@ -306,7 +305,7 @@ app.use((req, res, next) => {
   const port = Number(process.env.PORT) || 5e3;
   const listenOptions = {
     port,
-    host: "0.0.0.0"
+    host: "127.0.0.1"
   };
   if (process.platform !== "win32") {
     listenOptions.reusePort = true;

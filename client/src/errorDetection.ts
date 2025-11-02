@@ -1,6 +1,7 @@
 // FogueHack エラー検出・修正スクリプト
 import { GameEngine } from "./lib/gameEngine";
 import { useGameState } from "./lib/stores/useGameState";
+import { Direction } from "./lib/gameTypes";
 
 interface TestResult {
   test: string;
@@ -29,7 +30,7 @@ export class ErrorDetector {
 
       // 新ゲーム開始テスト
       const newState = gameEngine.startNewGame();
-      if (newState.phase !== "playing") {
+      if (newState.phase.current !== "playing") {
         throw new Error("ゲームフェーズが正しく設定されていません");
       }
 
@@ -57,7 +58,7 @@ export class ErrorDetector {
       const initialPos = { ...gameEngine.getGameState().player.position };
 
       // 有効な移動をテスト
-      const directions = ["north", "south", "east", "west"] as const;
+      const directions = [Direction.North, Direction.South, Direction.East, Direction.West];
       let successfulMoves = 0;
 
       for (const direction of directions) {

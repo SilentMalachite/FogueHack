@@ -14,10 +14,10 @@ const GameUI: React.FC = () => {
     startNewGame,
   } = useGameState();
 
-  if (phase === "menu") return null;
+  if (phase.current === "menu") return null;
 
   // インベントリ表示
-  if (phase === "inventory") {
+  if (phase.current === "inventory") {
     return (
       <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-90 flex items-center justify-center font-mono text-green-400">
         <div className="bg-black border-2 border-green-400 p-6 max-w-2xl w-full mx-4">
@@ -55,10 +55,10 @@ const GameUI: React.FC = () => {
             <div>
               <h3 className="text-xl mb-2 text-green-300">持ち物</h3>
               <div className="max-h-64 overflow-y-auto">
-                {player.inventory.length === 0 ? (
+                {player.inventory.items.length === 0 ? (
                   <p className="text-gray-500">アイテムがありません</p>
                 ) : (
-                  player.inventory.map((item, index) => (
+                  player.inventory.items.map((item, index) => (
                     <div
                       key={item.id}
                       className="flex justify-between items-center mb-2 p-2 border border-gray-600"
@@ -100,7 +100,7 @@ const GameUI: React.FC = () => {
   }
 
   // ゲームオーバー画面
-  if (phase === "dead") {
+  if (phase.current === "dead") {
     return (
       <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-90 flex items-center justify-center font-mono text-red-400">
         <div className="bg-black border-2 border-red-400 p-8 text-center">

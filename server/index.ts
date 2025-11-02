@@ -28,14 +28,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 function maskSensitive(value: any): any {
-  const SENSITIVE_KEYS = new Set([
-    "password",
-    "pass",
-    "token",
-    "authorization",
-    "auth",
-    "secret",
-  ]);
+  const SENSITIVE_KEYS = new Set(["password", "pass", "token", "authorization", "auth", "secret"]);
 
   const mask = (v: any): any => {
     if (v == null) return v;
@@ -117,12 +110,11 @@ app.use((req, res, next) => {
   // Serve API and client
   // Respect PORT env var if provided, fallback to 5000
   const port = Number(process.env.PORT) || 5000;
-  const listenOptions: { port: number; host: string; reusePort?: boolean } = {
+  const listenOptions: { port: number; host?: string; reusePort?: boolean } = {
     port,
-    host: "localhost",
   };
-  // SO_REUSEPORT is not supported on Windows; avoid ENOTSUP
-  if (process.platform !== "win32") {
+  // SO_REUSEPORT is not supported on Windows and macOS; avoid ENOTSUP
+  if (process.platform !== "win32" && process.platform !== "darwin") {
     listenOptions.reusePort = true;
   }
 

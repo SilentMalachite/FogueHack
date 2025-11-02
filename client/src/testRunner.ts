@@ -3,6 +3,7 @@ import { GameEngine } from "./lib/gameEngine";
 import { QuestSystem } from "./lib/questSystem";
 import { SpellSystem } from "./lib/spellSystem";
 import { CraftingSystem } from "./lib/craftingSystem";
+import { Direction } from "./lib/gameTypes";
 
 interface TestResult {
   name: string;
@@ -41,12 +42,12 @@ export class GameTestRunner {
 
       // 新ゲーム開始
       const newGameState = gameEngine.startNewGame();
-      if (newGameState.phase !== "playing") {
+      if (newGameState.phase.current !== "playing") {
         throw new Error("ゲーム開始後のフェーズが正しくありません");
       }
 
       // プレイヤー移動
-      const moveResult = gameEngine.movePlayer("north");
+      const moveResult = gameEngine.movePlayer(Direction.North);
       if (!moveResult.player) {
         throw new Error("移動後のプレイヤー状態が無効です");
       }
@@ -204,7 +205,7 @@ export class GameTestRunner {
 
       // モンスターと同じ位置に移動して戦闘発生
       gameState.player.position = { ...monster.position };
-      gameEngine.movePlayer("north"); // 何らかの行動で戦闘トリガー
+      gameEngine.movePlayer(Direction.North); // 何らかの行動で戦闘トリガー
 
       // 戦闘後の状態確認（HPが変化しているか）
       const afterCombatState = gameEngine.getGameState();

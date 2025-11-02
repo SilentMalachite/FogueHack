@@ -4,6 +4,7 @@ import { QuestSystem } from "../lib/questSystem";
 import { SpellSystem } from "../lib/spellSystem";
 import { CraftingSystem } from "../lib/craftingSystem";
 import { DungeonGenerator } from "../lib/dungeonGenerator";
+import { Direction } from "../lib/gameTypes";
 
 // 型エラーの検証
 export function validateTypes() {
@@ -19,7 +20,7 @@ export function validateTypes() {
     console.log("✅ ゲーム状態取得成功");
 
     // プレイヤー移動テスト
-    const newState = gameEngine.movePlayer("north");
+    const newState = gameEngine.movePlayer(Direction.North);
     console.log("✅ プレイヤー移動処理成功");
 
     // 魔法システムテスト

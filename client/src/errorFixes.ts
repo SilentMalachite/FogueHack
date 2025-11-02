@@ -1,6 +1,7 @@
 // FogueHack エラー修正実装
 import { GameEngine } from "./lib/gameEngine";
 import { useGameState } from "./lib/stores/useGameState";
+import { Direction } from "./lib/gameTypes";
 
 // 検出されたエラーの修正
 export class GameErrorFixer {
@@ -214,7 +215,7 @@ export class GameErrorFixer {
       const initialPos = { ...gameEngine.getGameState().player.position };
 
       // 各方向への移動テスト
-      const directions = ["north", "south", "east", "west"] as const;
+      const directions = [Direction.North, Direction.South, Direction.East, Direction.West];
       let successfulMoves = 0;
 
       for (const direction of directions) {

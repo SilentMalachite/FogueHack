@@ -103,9 +103,9 @@ export interface Room {
 }
 
 export interface GameState {
-  phase: "menu" | "playing" | "inventory" | "dead";
+  phase: GamePhase;
   dungeon: DungeonTile[][];
-  player: Player;
+  player: PlayerState;
   monsters: Monster[];
   items: Map<string, Item>;
   itemPositions: Map<string, string>; // positionKey -> itemId
@@ -115,12 +115,53 @@ export interface GameState {
   gameOver: boolean;
 }
 
-export type Direction =
-  | "north"
-  | "south"
-  | "east"
-  | "west"
-  | "northeast"
-  | "northwest"
-  | "southeast"
-  | "southwest";
+export interface GamePhase {
+  current: "menu" | "playing" | "inventory" | "dead";
+  last: "menu" | "playing" | "inventory" | "dead";
+}
+
+export interface PlayerState {
+  position: Position;
+  hp: number;
+  maxHp: number;
+  mp: number;
+  maxMp: number;
+  level: number;
+  exp: number;
+  expToNext: number;
+  attack: number;
+  defense: number;
+  inventory: InventoryState;
+  equipment: Equipment;
+  gold: number;
+  knownSpells: string[]; // 習得済み魔法のID
+  magicPower: number; // 魔法攻撃力
+  craftingLevel: number; // 合成レベル
+}
+
+export interface InventoryState {
+  items: Item[];
+  equipped: { weapon?: string; armor?: string; };
+  craftingMaterials: Map<string, number>; // materialId -> quantity
+}
+
+export interface UIState {
+  showInventory: boolean;
+  showMenu: boolean;
+  showCrafting: boolean;
+  showSpellList: boolean;
+  showQuestLog: boolean;
+  selectedSlot: number;
+  hoveredItem: string | null;
+}
+
+export enum Direction {
+  North = "north",
+  South = "south",
+  East = "east",
+  West = "west",
+  Northeast = "northeast",
+  Northwest = "northwest",
+  Southeast = "southeast",
+  Southwest = "southwest"
+}

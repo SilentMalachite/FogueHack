@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback, useState } from "react";
 import { useGameState } from "../lib/stores/useGameState";
 import { useAudio } from "../lib/stores/useAudio";
+import { Direction } from "../lib/gameTypes";
 import GameMenu from "./GameMenu";
 import GameMap from "./GameMap";
 import GameUI from "./GameUI";
@@ -29,7 +30,7 @@ const Game: React.FC = () => {
 
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
-      if (phase === "menu") return;
+      if (phase.current === "menu") return;
 
       const key = event.key.toLowerCase();
       const { ctrlKey, shiftKey } = event;
@@ -71,38 +72,38 @@ const Game: React.FC = () => {
         case "w":
         case "arrowup":
           event.preventDefault();
-          movePlayer("north");
+          movePlayer(Direction.North);
           return;
         case "s":
         case "arrowdown":
           event.preventDefault();
-          movePlayer("south");
+          movePlayer(Direction.South);
           return;
         case "a":
         case "arrowleft":
           event.preventDefault();
-          movePlayer("west");
+          movePlayer(Direction.West);
           return;
         case "d":
         case "arrowright":
           event.preventDefault();
-          movePlayer("east");
+          movePlayer(Direction.East);
           return;
         case "q":
           event.preventDefault();
-          movePlayer("northwest");
+          movePlayer(Direction.Northwest);
           return;
         case "e":
           event.preventDefault();
-          movePlayer("northeast");
+          movePlayer(Direction.Northeast);
           return;
         case "z":
           event.preventDefault();
-          movePlayer("southwest");
+          movePlayer(Direction.Southwest);
           return;
         case "c":
           event.preventDefault();
-          movePlayer("southeast");
+          movePlayer(Direction.Southeast);
           return;
       }
 
@@ -133,7 +134,7 @@ const Game: React.FC = () => {
           setShowSpellBook((v) => !v);
           return;
         case "escape":
-          if (phase === "inventory") {
+          if (phase.current === "inventory") {
             event.preventDefault();
             toggleInventory();
           }
@@ -151,9 +152,6 @@ const Game: React.FC = () => {
       startNewGame,
       toggleMute,
       toggleMusic,
-      showSpellBook,
-      showCrafting,
-      showQuestLog,
     ],
   );
 
@@ -167,7 +165,7 @@ const Game: React.FC = () => {
   // ページを離れる前にオートセーブ
   useEffect(() => {
     const handleBeforeUnload = () => {
-      if (phase === "playing") {
+      if (phase.current === "playing") {
         saveGame();
       }
     };
@@ -182,7 +180,9 @@ const Game: React.FC = () => {
     <div className="w-full h-screen bg-black text-green-400 font-mono overflow-hidden relative">
       <GameMenu />
 
-      {(phase === "playing" || phase === "inventory" || phase === "dead") && (
+      {(phase.current === "playing" ||
+        phase.current === "inventory" ||
+        phase.current === "dead") && (
         <div className="flex h-full">
           {/* メインゲーム画面 */}
           <div className="flex-1 p-4 overflow-hidden">

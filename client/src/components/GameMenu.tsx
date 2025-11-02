@@ -13,7 +13,7 @@ const GameMenu: React.FC = () => {
     loadGame();
   };
 
-  if (phase !== "menu") return null;
+  if (phase.current !== "menu") return null;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black text-green-400 font-mono">

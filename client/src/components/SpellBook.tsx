@@ -5,7 +5,7 @@ const SpellBook: React.FC = () => {
   const { getKnownSpells, castSpell, player, phase } = useGameState();
   const [selectedSpell, setSelectedSpell] = useState<string | null>(null);
 
-  if (phase !== "playing") return null;
+  if (phase.current !== "playing") return null;
 
   const knownSpells = getKnownSpells();
 

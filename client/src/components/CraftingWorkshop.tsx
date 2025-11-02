@@ -6,7 +6,7 @@ const CraftingWorkshop: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("weapon");
   const [selectedRecipe, setSelectedRecipe] = useState<string | null>(null);
 
-  if (phase !== "playing") return null;
+  if (phase.current !== "playing") return null;
 
   const availableRecipes = getAvailableRecipes();
   const categories = ["weapon", "armor", "potion", "accessory"];
@@ -123,7 +123,7 @@ const CraftingWorkshop: React.FC = () => {
       <div className="mb-3 p-2 bg-gray-900 rounded">
         <h4 className="text-sm font-medium mb-2 text-gray-300">所持素材</h4>
         <div className="grid grid-cols-2 gap-1 text-xs">
-          {player.inventory
+          {player.inventory.items
             .filter((item) => item.type === "material" || item.type === "gem")
             .reduce((acc: any[], item) => {
               const existing = acc.find((i) => i.name === item.name);

@@ -1,5 +1,6 @@
 // FogueHack 最終検証スクリプト
 import { GameEngine } from "./lib/gameEngine";
+import { Direction } from "./lib/gameTypes";
 
 export class FinalValidator {
   // 1. 型安全性の確認
@@ -10,7 +11,8 @@ export class FinalValidator {
       const state = gameEngine.getGameState();
 
       // 必須プロパティの型チェック
-      if (typeof state.phase !== "string") return false;
+      if (typeof state.phase !== "object" || !state.phase.current || !state.phase.last)
+        return false;
       if (typeof state.player !== "object") return false;
       if (!Array.isArray(state.dungeon)) return false;
       if (!Array.isArray(state.monsters)) return false;
@@ -73,10 +75,12 @@ export class FinalValidator {
       const recipes = gameEngine.getAvailableRecipes();
       if (!Array.isArray(recipes)) return false;
 
-      // セーブ/ロード連携
-      gameEngine.saveGame();
-      const loadedState = gameEngine.loadGame();
-      if (!loadedState) return false;
+      // セーブ/ロード連携 (ブラウザ環境でのみテスト)
+      if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+        gameEngine.saveGame();
+        const loadedState = gameEngine.loadGame();
+        if (!loadedState) return false;
+      }
 
       console.log("✅ システム間連携確認完了");
       return true;
@@ -101,7 +105,7 @@ export class FinalValidator {
 
       // 複数操作のパフォーマンス
       for (let i = 0; i < 10; i++) {
-        gameEngine.movePlayer("north");
+        gameEngine.movePlayer(Direction.North);
         gameEngine.castSpell("heal");
       }
       const operationTime = performance.now();
@@ -174,6 +178,10 @@ export class FinalValidator {
   // 6. メモリリークの確認
   static validateMemoryUsage(): boolean {
     try {
+      if (typeof window === "undefined") {
+        console.log("メモリ使用量確認はブラウザ環境でのみ実行可能です");
+        return true; // Node.js環境ではスキップ
+      }
       const initialMemory = (performance as any).memory?.usedJSHeapSize || 0;
 
       // 多数のゲームインスタンス作成・破棄
@@ -183,7 +191,7 @@ export class FinalValidator {
 
         // 各種操作実行
         for (let j = 0; j < 3; j++) {
-          gameEngine.movePlayer("north");
+          gameEngine.movePlayer(Direction.North);
           gameEngine.castSpell("heal");
         }
       }

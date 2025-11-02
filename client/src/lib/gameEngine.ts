@@ -1,4 +1,15 @@
-import { GameState, Player, PlayerState, Monster, Item, Position, Direction, Spell, GamePhase, InventoryState } from "./gameTypes";
+import {
+  GameState,
+  Player,
+  PlayerState,
+  Monster,
+  Item,
+  Position,
+  Direction,
+  Spell,
+  GamePhase,
+  InventoryState,
+} from "./gameTypes";
 import { DungeonGenerator } from "./dungeonGenerator";
 import { SpellSystem } from "./spellSystem";
 import { CraftingSystem } from "./craftingSystem";
@@ -598,6 +609,10 @@ export class GameEngine {
   }
 
   saveGame(): void {
+    if (typeof window === "undefined" || typeof localStorage === "undefined") {
+      console.warn("Save/Load is only available in browser environment");
+      return;
+    }
     localStorage.setItem(
       "foguehack_save",
       JSON.stringify({
@@ -608,7 +623,9 @@ export class GameEngine {
           ...this.gameState.player,
           inventory: {
             ...this.gameState.player.inventory,
-            craftingMaterials: Array.from(this.gameState.player.inventory.craftingMaterials.entries()),
+            craftingMaterials: Array.from(
+              this.gameState.player.inventory.craftingMaterials.entries(),
+            ),
           },
         },
         questData: this.questSystem.getQuestData(),
@@ -617,6 +634,10 @@ export class GameEngine {
   }
 
   loadGame(): GameState | null {
+    if (typeof window === "undefined" || typeof localStorage === "undefined") {
+      console.warn("Save/Load is only available in browser environment");
+      return null;
+    }
     const saveData = localStorage.getItem("foguehack_save");
     if (!saveData) return null;
 
@@ -700,12 +721,11 @@ export class GameEngine {
   castSpell(spellId: string, targetPosition?: Position): GameState {
     const target = targetPosition || this.gameState.player.position;
     const playerAsPlayer = this.playerStateToPlayer(this.gameState.player);
-    const result = this.spellSystem.castSpell(
-      spellId,
-      playerAsPlayer,
-      target,
-      this.gameState,
-    );
+    const result = this.spellSystem.castSpell(spellId, playerAsPlayer, target, this.gameState);
+
+    if (!result.success) {
+      throw new Error(result.message);
+    }
 
     if (result.success && result.gameState) {
       this.gameState = result.gameState;
